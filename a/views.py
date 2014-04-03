@@ -7,8 +7,10 @@ from django.views import generic
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
-from a.models import Poll, Reservation, Choice
+from a.models import Poll, Reservation, Choice, Room
 
 
 class IndexView(generic.ListView):
@@ -82,5 +84,40 @@ def log_out(request):
 
 @login_required
 def list(request):
-    return render(request, 'a/list.html')
+    queryset = Room.objects.all()
+
+    if request.method == "POST":
+        if request.POST['keyword']:
+            word = request.POST['keyword']
+            queryset = queryset.filter(Q(name__contains=word) | Q(capacity=word) | Q(description__contains=word))
+
+
+
+#nie dzialaja obie jednoczesnie, bo nie da sie dla obu sprawdzic czy reuqestmethod na ktorej bylo wywolane!
+# znaczy pewnie sie jakos da
+
+
+#        if request.POST['order']:
+#            order = request.POST['order']
+#            if order == '1':
+#                queryset = queryset.order_by('capacity').reverse()
+#            else:
+#                pass
+
+
+
+    paginator = Paginator(queryset, 2)
+    # Make sure page request is an int. If not, deliver first page.
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:
+        queryset = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        queryset = paginator.page(paginator.num_pages)
+
+    return render(request, 'a/list.html', {'queryset':queryset})
     #return HttpResponse("Strona z rezerwacjami, tutaj powinna byc lista")
