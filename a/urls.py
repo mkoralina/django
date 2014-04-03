@@ -11,5 +11,4 @@ urlpatterns = patterns('',
     url(r'^reserve/(?P<reservation_id>\d+)/$', views.reserve, name='reserve'),
     url(r'^login$', views.log_in, name='login'),
     url(r'^logout$', views.log_out, name='logout'),
-
 )

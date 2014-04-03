@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from a.models import Poll, Reservation, Choice
 
