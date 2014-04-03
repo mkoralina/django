@@ -1,37 +1,32 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
-
-# Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
-from a.models import Poll, Reservation, Choice
 from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
+from django.views import generic
+from django.contrib.auth import logout, authenticate, login
+from django.contrib import messages
+
+from a.models import Poll, Reservation, Choice
 
 
-def index(request):
-    latest_poll_list = Poll.objects.order_by('-pub_date')[:5]
+class IndexView(generic.ListView):
+    template_name = 'a/index.html'
+    context_object_name = 'latest_poll_list'
 
-    context = {'latest_poll_list': latest_poll_list}
-    return render(request, 'a/index.html', context)
-
-    #template = loader.get_template('a/index.html')
-    #context = RequestContext(request, {
-    #    'latest_poll_list': latest_poll_list,
-    #})
-    #return HttpResponse(template.render(context))
-
-#def index(request):
-#    return HttpResponse("Hello, world. You're at the poll index.")    
+    def get_queryset(self):
+        """Return the last five published polls."""
+        return Poll.objects.order_by('-pub_date')[:5]
 
 
-def detail(request, poll_id):
-    poll = get_object_or_404(Poll, pk=poll_id)
-    return render(request, 'a/detail.html', {'poll': poll})
+class DetailView(generic.DetailView):
+    model = Poll
+    template_name = 'a/detail.html'
 
 
-def results(request, poll_id):
-    poll = get_object_or_404(Poll, pk=poll_id)
-    return render(request, 'a/results.html', {'poll': poll})
+class ResultsView(generic.DetailView):
+    model = Poll
+    template_name = 'a/results.html'
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)
@@ -51,9 +46,40 @@ def vote(request, poll_id):
         # user hits the Back button.
         return HttpResponseRedirect(reverse('a:results', args=(p.id,)))
 
-def reserve(request, reservation_id):  
+def reserve(request, reservation_id):
 	try:
 		reservation = Reservation.objects.get(pk=reservation_id)
 	except Reservation.DoesNotExist:
 		raise Http404
-	return HttpResponse("Strona z rezerwacjami. Rezerwacja: %s." % reservation_id)
+	return HttpResponse("Strona z rezerwacjami.\
+	 Rezerwacja: %s." % reservation_id)
+
+# nie kompilowane
+def log_in(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+            else:
+                messages.error(request, 'Konto zablokowane')
+        else:
+            messages.error(request, 'Zle haslo lub nazwa uzytkownika')
+        return redirect('a:list')
+        #return messages.error(request, 'Tu powinno byc przekierowanie na glowna')
+    else:
+        return render(request, 'a/login.html')
+        #return HttpResponse("Tutaj bedzie formularz do logowania")
+
+def log_out(request):
+    logout(request)
+    return redirect('a:list')
+    # dziala tez np. return redirect('lista')
+
+
+@login_required
+def list(request):
+    return render(request, 'a/list.html')
+    #return HttpResponse("Strona z rezerwacjami, tutaj powinna byc lista")

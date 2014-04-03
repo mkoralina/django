@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>{% block title %}Glowna</title>{% endblock%}</head>
+<body>
+
+{% block content %}
+
+{% if messages %} <!--jesli jest wiadomosc, np. zle haslo przy logowaniu-->
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
+<p>Jestes zalogowany jako {{ user.username }}. <a href="{% url 'a:logout' %}">Wyloguj.</a></p>
+
+{% else %}
+<p>
+<form action="{% url 'a:login' %}" method="POST">
+    {% csrf_token %} <!--pamietaj!!!-->
+    <input type="text" name="username">
+    <input type="text" name="password">
+    <input type="submit" value="Zaloguj sie !">
+</form>
+{% endif %}
+
+{% endblock %}
+
+</body>
+</html>
