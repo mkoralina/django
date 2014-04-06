@@ -1,13 +1,7 @@
 from django.db import models
 import datetime
 from django.utils import timezone
-
-# Class User with user's personal data
-class User(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    def __unicode__(self):
-    	return self.first_name + " " + self.last_name
+from django.contrib.auth.models import User
 
 # Class Term definind available time periods to make reservation
 class Term(models.Model):

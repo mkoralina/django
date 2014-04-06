@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
-from a.models import Poll, Reservation, Choice, Room
+from a.models import Poll, Reservation, Choice, Room, Term
 
 
 class IndexView(generic.ListView):
@@ -22,15 +22,29 @@ class IndexView(generic.ListView):
         return Poll.objects.order_by('-pub_date')[:5]
 
 
-class DetailView(generic.DetailView):
-    model = Poll
-    template_name = 'a/detail.html'
+#class DetailView(generic.DetailView):
+#    model = Room
+#    template_name = 'a/detail.html'
+
+@login_required
+def detail(request, room_id):
+    room = Room.objects.get(id=room_id)
+    return render(request, 'a/detail.html', {'room':room})
 
 
-class ResultsView(generic.DetailView):
-    model = Poll
-    template_name = 'a/results.html'
+#class ResultsView(generic.DetailView):
+#    model = Poll
+#    template_name = 'a/results.html'
 
+@login_required
+def make_reservation(request, room_id, term_id):
+    r = Reservation(room = Room.objects.get(id=room_id),
+                    term = Term.objects.get(id=term_id),
+                    user = request.user)
+    return HttpResponse("Udalo Ci sie zarezerwowac sale (nieprawda, nie sprawdzilem tego")
+
+
+# do wyrzucenia
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)
     try:
@@ -49,6 +63,7 @@ def vote(request, poll_id):
         # user hits the Back button.
         return HttpResponseRedirect(reverse('a:results', args=(p.id,)))
 
+# tego juz nie uzywam (?)
 def reserve(request, reservation_id):
 	try:
 		reservation = Reservation.objects.get(pk=reservation_id)
@@ -82,8 +97,9 @@ def log_out(request):
     # dziala tez np. return redirect('lista')
 
 
+
 @login_required
-def list(request):
+def keyword(request):
     queryset = Room.objects.all()
 
     if request.method == "POST":
@@ -91,22 +107,41 @@ def list(request):
             word = request.POST['keyword']
             queryset = queryset.filter(Q(name__contains=word) | Q(capacity=word) | Q(description__contains=word))
 
-
-
-#nie dzialaja obie jednoczesnie, bo nie da sie dla obu sprawdzic czy reuqestmethod na ktorej bylo wywolane!
-# znaczy pewnie sie jakos da
-
-
-#        if request.POST['order']:
-#            order = request.POST['order']
-#            if order == '1':
-#                queryset = queryset.order_by('capacity').reverse()
-#            else:
-#                pass
-
-
-
     paginator = Paginator(queryset, 2)
+    # Make sure page request is an int. If not, deliver first page.
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:
+        queryset = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        queryset = paginator.page(paginator.num_pages)
+
+    return render(request, 'a/list.html', {'queryset':queryset})
+
+
+
+@login_required
+def list(request):
+
+    queryset = Room.objects.all()
+
+    if request.method == "POST":
+        if request.POST['order']:
+            order = request.POST['order']
+            if order == '1':
+                queryset = queryset.order_by('capacity').reverse()
+            else:
+                pass
+
+        if request.POST['keyword']:
+            word = request.POST['keyword']
+            queryset = queryset.filter(Q(name__contains=word) | Q(capacity=word) | Q(description__contains=word))
+
+    paginator = Paginator(queryset, 10)
     # Make sure page request is an int. If not, deliver first page.
     try:
         page = int(request.GET.get('page', '1'))

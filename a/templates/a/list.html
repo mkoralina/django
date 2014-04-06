@@ -16,42 +16,38 @@
     Moja lista pokoi razem z ich pojemnoscia:
 
     <br> Czemu to nie działa? DZIAŁA!!!!
-    {% for room in queryset %} <li>{{room.name}} {{room.capacity}}</li>
+    {% for room in queryset %}
+        <li><a href="{% url 'a:detail' room.id %}">{{ room.name }}</a>{{room.capacity}} </li> <!--zamiast numeru id dac nazwe moze-->
     {% endfor %}
+
+
+
+
+
 
 <!-- paginator-->
 
-{% for contact in contacts.object_list %}
+{% for room in queryset %}
     {# Each "contact" is a Contact model object. #}
-    {{ contact.full_name|upper }}<br />
+    {{ room.full_name|upper }}<br />
     ...
 {% endfor %}
 
 <div class="pagination">
     <span class="step-links">
-        {% if contacts.has_previous %}
-            <a href="?page={{ contacts.previous_page_number }}">previous</a>
+        {% if queryset.has_previous %}
+            <a href="?page={{ queryset.previous_page_number }}">previous</a>
         {% endif %}
 
         <span class="current">
-            Page {{ contacts.number }} of {{ contacts.paginator.num_pages }}.
+            Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
         </span>
 
-        {% if contacts.has_next %}
-            <a href="?page={{ contacts.next_page_number }}">next</a>
+        {% if queryset.has_next %}
+            <a href="?page={{ queryset.next_page_number }}">next</a>
         {% endif %}
     </span>
 </div>
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -73,43 +69,10 @@
     <!--do wybierania rodzaju sortowania formularz-->
     <input type="text" name="order">
     <input type="submit" value="capacity_reversed">
-</form>
-
-
-<!--wyszukiwanie po slowie kluczu-->
-<form action="{% url 'a:list' %}" method="POST">
-    {% csrf_token %} <!--pamietaj!!!-->
-
+<br><Br>
     <input type="text" name="keyword">
     <input type="submit" value="Wyszukaj">
 </form>
-
-
-
-
-
-
-
-<table border=1>
-    <th>Pokój</th>
-    <th>Pojemność</th>
-    {% for event in events %}
-    <tr>
-    {% for x in event %} <td>{{ x }}</td>
-    {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
-
-<br><br>
-
-
-    <li><a href="{% url 'a:list' %}">List (czyli tu gdzie jestes na dobra sprawe)</a></li>
-
-
-
-
-
 
 
 

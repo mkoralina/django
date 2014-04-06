@@ -1,12 +1,22 @@
-<h1>{{ poll.question }}</h1>
+<h1>{{ room.name }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="{% url 'a:vote' poll.id %}" method="post">
-{% csrf_token %}
-{% for choice in poll.choice_set.all %}
-    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+
+
+
+{% for term in room.terms.all %}
+    Date: {{term.date}} <br>
+    Time: {{term.begin_time}} - {{term.end_time}} <br>
+    <a href="{% url 'a:make_reservation' room.id term.id %}">Zarezerwuj</a><br><br>
+
+
 {% endfor %}
-<input type="submit" value="Vote" />
-</form>
+
+    <br><br>
+
+
+
+
+<!--        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />  -->

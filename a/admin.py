@@ -5,7 +5,6 @@ from a.models import User, Term, Room, Reservation, Poll, Choice
 
 
 # Register your models here.
-admin.site.register(User)
 admin.site.register(Term)
 admin.site.register(Room)
 admin.site.register(Reservation)
