@@ -1,16 +1,30 @@
 from django.db import models
+from django.forms import ModelForm
 import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+from django.core.exceptions import ValidationError
+
+#def validate_end_time(beg, ed):
+#    if value % 2 != 0:
+#        raise ValidationError('%s is not an even number' % value)
+
 # Class Term definind available time periods to make reservation
 class Term(models.Model):
-	date = models.DateField()
-	begin_time = models.TimeField()
-	end_time = models.TimeField()
-	#pass
+    date = models.DateField()
+    begin_time = models.TimeField()
+    end_time = models.TimeField()
+    def __unicode__(self):
+        return '{0}, {1} - {2}'.format(self.date, self.begin_time, self.end_time)
+    class Meta:
+        unique_together = ("date","begin_time", "end_time")
 
-# Class Room with basic info about the room to reserve 
+
+
+
+
+# Class Room with basic info about the room to reserve
 class Room(models.Model):
 	name = models.CharField(max_length=30)
 	capacity = models.IntegerField()
