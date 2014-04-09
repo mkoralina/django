@@ -30,12 +30,37 @@ class PollAdmin(admin.ModelAdmin):
 
 	#'classes': ['collapse'] - opcja: show/hide fieldset
 
+
+class RoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['name', 'capacity', 'description', 'terms']
+
+    def clean_terms(self):
+        terms = self.cleaned_data['terms']
+        for first in terms:
+            for second in terms:
+                if first.date == second.date:
+                    if first.end_time <= second.begin_time or second.end_time <= first.begin_time:
+                        pass
+                    elif first == second:
+                        pass
+                    else:
+                        raise ValidationError("The terms you want to add coincide.")
+        return terms
+
 class RoomAdmin(admin.ModelAdmin):
-    def get_form(self, request, obj=None, **kwargs):
-        self.exclude = []
-        if not request.user.is_superuser:
-            self.exclude.append('description')
-        return super(Room, self).get_form(request, obj, **kwargs)
+    filter_horizontal = ['terms']
+    form = RoomForm
+
+#class RoomAdmin(admin.ModelAdmin):
+#    form = RoomForm
+#
+#    def get_form(self, request, obj=None, **kwargs):
+#        self.exclude = []
+#        if not request.user.is_superuser:
+#            self.exclude.append('description')
+#        return super(Room, self).get_form(request, obj, **kwargs)
 
 
 class TermForm(forms.ModelForm):
@@ -50,18 +75,12 @@ class TermForm(forms.ModelForm):
 
         if end_time < begin_time:
             raise forms.ValidationError("End time must not be greater than begin time")
-
+        return cleaned_data
 
 class TermAdmin(admin.ModelAdmin):
     form = TermForm
 
-#class TermAdmin(admin.ModelAdmin):
-#    def validate(self):
-#        begin_time = self.cleaned_data.get("begin_time")
-#        end_time = self.cleaned_data.get("end_time")
-#        if end_time < begin_time:
-#            raise ValidationError("End_time cannot be greater than begin_time")
-            #self.cleaned_data['end_time'] = begin_time
+
 	
 
 admin.site.register(Poll, PollAdmin)

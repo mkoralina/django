@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 #    if value % 2 != 0:
 #        raise ValidationError('%s is not an even number' % value)
 
-# Class Term definind available time periods to make reservation
+# Class Term defines available time periods to make reservation
 class Term(models.Model):
     date = models.DateField()
     begin_time = models.TimeField()
@@ -21,15 +21,14 @@ class Term(models.Model):
         unique_together = ("date","begin_time", "end_time")
 
 
-
-
-
 # Class Room with basic info about the room to reserve
 class Room(models.Model):
-	name = models.CharField(max_length=30)
-	capacity = models.IntegerField()
-	description = models.CharField(max_length=100)
-	terms = models.ManyToManyField(Term)
+    name = models.CharField(max_length=30)
+    capacity = models.IntegerField()
+    description = models.CharField(max_length=100)
+    terms = models.ManyToManyField(Term)
+    def __unicode__(self):
+        return self.name
 
 class Reservation(models.Model):
 	room = models.ForeignKey(Room)

@@ -52,7 +52,6 @@ def make_reservation(request, room_id, term_id):
                       {'error_message': 'We are sorry, the term you wanted to '
                                         'reserve is no longer available.'} )
 
-
     if request.method == "POST":
         if request.POST['begin_time'] and request.POST['end_time']:
             begin_time = request.POST['begin_time']
@@ -71,11 +70,11 @@ def make_reservation(request, room_id, term_id):
                     # we need to make w new Term with time (term.begin_time; begin_time)
                     # check if the term already exists
                     try:
-                        new_term = Term.objects.get(date = term.date, begin_time = begin_time, end_time = term.begin_time)
+                        new_term = Term.objects.get(date = term.date, begin_time = term.begin_time, end_time = begin_time)
                     except Term.DoesNotExist:
                         new_term = Term(date = term.date, begin_time = begin_time, end_time = term.begin_time)
                         new_term.save()
-                        room.terms.add(new_term)
+                    room.terms.add(new_term)
 
                 if end_time < term.end_time:
                     # check if the term already exists
@@ -84,17 +83,20 @@ def make_reservation(request, room_id, term_id):
                     except Term.DoesNotExist:
                         new_term = Term(date = term.date, begin_time = end_time, end_time = term.end_time)
                         new_term.save()
-                        room.terms.add(new_term)
+                    room.terms.add(new_term)
 
                 #create new term between new times
                 new_term = Term(date = term.date, begin_time = begin_time, end_time = end_time)
                 new_term.save()
 
                 room.terms.remove(term)
-                #Term.objects.get(id = )
-                #delete old term if no other room is attached to it
-                #term.delete()
 
+                rooms = Room.objects.all()
+                rooms = rooms.filter(terms = term)
+                if rooms:
+                    pass
+                else:
+                    term.delete()
 
                 term = new_term
 
