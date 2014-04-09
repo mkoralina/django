@@ -2,11 +2,9 @@ from django.contrib import admin
 from a.models import User, Term, Room, Reservation, Poll, Choice
 
 
-
-
 # Register your models here.
 admin.site.register(Term)
-admin.site.register(Room)
+#admin.site.register(Room)
 admin.site.register(Reservation)
 #admin.site.register(Choice)
 
@@ -29,9 +27,16 @@ class PollAdmin(admin.ModelAdmin):
 	
 
 	#'classes': ['collapse'] - opcja: show/hide fieldset
+
+class RoomAdmin(admin.ModelAdmin):
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = []
+        if not request.user.is_superuser:
+            self.exclude.append('description')
+        return super(Room, self).get_form(request, obj, **kwargs)
 	
 
 admin.site.register(Poll, PollAdmin)
-
+admin.site.register(Room, RoomAdmin)
 
 

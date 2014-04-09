@@ -1,17 +1,57 @@
 <h1>{{ room.name }}</h1>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>
+{% else %}
+
+{% if room.terms.all %}
+
+<table borderline="0">
+<tr><td><b>Date</b></td><td><b>Time</b></td><td><b>Choose your hours</b></td></tr>
+
 
 
 
 
 {% for term in room.terms.all %}
-    Date: {{term.date}} <br>
-    Time: {{term.begin_time}} - {{term.end_time}} <br>
-    <a href="{% url 'a:make_reservation' room.id term.id %}">Zarezerwuj</a><br><br>
+    <!-- zeby bylo ladniej, to mozna to jeszcze pogrupowac po datach -->
 
 
+
+<tr><td>{{term.date}}</td><td>{{term.begin_time}} - {{term.end_time}}</td>
+<td>
+
+    <form action="{% url 'a:make_reservation' room.id term.id %}" method="POST">
+        {% csrf_token %} <!--pamietaj!!!-->
+        <br>
+        From:<input type="time" name="begin_time">
+        to:<input type="time" name="end_time">
+        <input type="submit" value="Reserve">
+    </form>
+
+</td></tr>
 {% endfor %}
+ </table>
+
+    {% else %}
+
+    There are no terms available.
+    <a href="{% url 'a:list' %}">Choose a different room.</a>
+
+    {% endif %}
+
+<hr>
+{% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
+<p>You are logged in as: {{ user.username }}<br> <a href="{% url 'a:logout' %}">Log out</a></p>
+{% endif %}
+
+
+
+
+
+{% endif %}
+
+
+
 
     <br><br>
 

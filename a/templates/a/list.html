@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head><title>{% block title %}Glowna</title>{% endblock%}</head>
+<head><title>{% block title %}Main</title>{% endblock%}</head>
 <body>
-{% block content %}
-<ul>
-    <li><a href="{% url 'a:index' %}">Index</a></li>
-    <li><a href="{% url 'a:list' %}">List (czyli tu gdzie jestes na dobra sprawe)</a></li>
-</ul>
-
-{% endblock %}
-
-<br><br>
 
 
-    Moja lista pokoi razem z ich pojemnoscia:
 
-    <br> Czemu to nie działa? DZIAŁA!!!!
+
+
+<form action="{% url 'a:list' %}" id="form_order" method="POST">
+    {% csrf_token %}
+    <input type="text" name="keyword">
+    <input type="submit" value="Search">
+</form>
+<select name="order" form="form_order" onchange="this.form.submit()">
+  <option value="'0'">Choose order of display</option>
+  <option value="alph">A-Z</option>
+  <option value="alph_inv">Z-A</option>
+  <option value="cap">by capacity ascending</option>
+  <option value="cap_inv">by capacity descending</option>
+</select><br><br>
+
+
+
+    Rooms with their capacities:
+
+
+
+    <br><br>
+    <table borderline="0">
+        <tr><td><b>Room</b></td><td><b>Capacity</b></td></tr>
     {% for room in queryset %}
-        <li><a href="{% url 'a:detail' room.id %}">{{ room.name }}</a>{{room.capacity}} </li> <!--zamiast numeru id dac nazwe moze-->
+        <tr>
+            <td><a href="{% url 'a:detail' room.id %}">{{ room.name }}</a></td>
+            <td>{{room.capacity}}</td>
+        </tr>
     {% endfor %}
-
-
-
-
-
-
-<!-- paginator-->
-
-{% for room in queryset %}
-    {# Each "contact" is a Contact model object. #}
-    {{ room.full_name|upper }}<br />
-    ...
-{% endfor %}
+    </table>
+<br>
 
 <div class="pagination">
     <span class="step-links">
@@ -48,6 +53,7 @@
         {% endif %}
     </span>
 </div>
+<br><br>
 
 
 
@@ -64,21 +70,17 @@
 
 
 
-<form action="{% url 'a:list' %}" method="POST">
-    {% csrf_token %} <!--pamietaj!!!-->
-    <!--do wybierania rodzaju sortowania formularz-->
-    <input type="text" name="order">
-    <input type="submit" value="capacity_reversed">
-<br><Br>
-    <input type="text" name="keyword">
-    <input type="submit" value="Wyszukaj">
-</form>
+
+
+
 
 
 
 
 <hr>
-<a href="{% url 'a:index' %}">Wroc na strone startowa</a><br>
+{% block content %}
+    <a href="{% url 'a:list' %}">Go back to the beginning of the search</a>
+{% endblock %}
 {% if messages %} <!--jesli jest wiadomosc, np. zle haslo przy logowaniu-->
 <ul>
     {% for message in messages %}
@@ -87,14 +89,7 @@
 </ul>
 {% endif %}
 {% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
-<p>{{ user.username }} <a href="{% url 'a:logout' %}">wyloguj</a></p>
-{% else %}
-<p><form action="{% url 'a:login' %}" method="POST">
-    {% csrf_token %} <!--pamietaj!!!-->
-    <input type="text" name="username">
-    <input type="text" name="password">
-    <input type="submit" value="Zaloguj sie !">
-</form>
+<p>You are logged in as: {{ user.username }}<br> <a href="{% url 'a:logout' %}">Log out</a></p>
 {% endif %}
 
 </body>

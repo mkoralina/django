@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+
+{% if error_message %}<p>{{ error_message }}</p>
+{% else %}
+
+You have successfully reserved the room from {{begin_time}} to {{end_time}} (nieprawda, nie sprawdzilem tego)
+
+{% endif %}
+{% block content %}
+<ul>
+    <a href="{% url 'a:list' %}">Go back to the main menu</a></li>
+</ul>
+
+{% endblock %}
+
+
+
+
+</body>
+</html>
