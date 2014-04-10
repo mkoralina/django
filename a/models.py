@@ -32,6 +32,12 @@ class Reservation(models.Model):
     term = models.ForeignKey(Term)
     user = models.ForeignKey(User)
 
+    def __unicode__(self):
+        return '{0}, {1}, {2} - {3}'.format(self.user.username,
+                                            self.term.date,
+                                            self.term.begin_time,
+                                            self.term.end_time)
+
 
 class Poll(models.Model):
     question = models.CharField(max_length=200)

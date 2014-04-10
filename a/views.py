@@ -52,8 +52,8 @@ def make_reservation(request, room_id, term_id):
                                                     begin_time=term.begin_time,
                                                     end_time=begin_time)
                     except Term.DoesNotExist:
-                        new_term = Term(date=term.date, begin_time=begin_time,
-                                        end_time=term.begin_time)
+                        new_term = Term(date=term.date, begin_time=term.begin_time,
+                                        end_time=begin_time)
                         new_term.save()
 
                     room.terms.add(new_term)
@@ -89,7 +89,8 @@ def make_reservation(request, room_id, term_id):
             r = Reservation(room=room, term=term, user=request.user)
             r.save()
             return render(request, 'a/make_reservation.html',
-                          {'begin_time': begin_time, 'end_time': end_time})
+                          {'begin_time': begin_time, 'end_time': end_time,
+                           'room_name': room.name})
 
         else:
             return render(request, 'a/make_reservation.html',
