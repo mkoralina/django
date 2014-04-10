@@ -3,40 +3,32 @@
 <head><title>{% block title %}Main</title>{% endblock%}</head>
 <body>
 
-
-
-
-
 <form action="{% url 'a:list' %}" id="form_order" method="POST">
     {% csrf_token %}
     <input type="text" name="keyword">
     <input type="submit" value="Search">
 </form>
+
 <select name="order" form="form_order" onchange="this.form.submit()">
-  <option value="'0'">Choose order of display</option>
-  <option value="alph">A-Z</option>
-  <option value="alph_inv">Z-A</option>
-  <option value="cap">by capacity ascending</option>
-  <option value="cap_inv">by capacity descending</option>
+    <option value="'0'">Choose order of display</option>
+    <option value="alph">A-Z</option>
+    <option value="alph_inv">Z-A</option>
+    <option value="cap">by capacity ascending</option>
+    <option value="cap_inv">by capacity descending</option>
 </select><br><br>
 
+Rooms with their capacities: <br><br>
+<table border="0">
+    <tr><td><b>Room</b></td>
+        <td><b>Capacity</b></td>
+    </tr>
 
-
-    Rooms with their capacities:
-
-
-
-    <br><br>
-    <table borderline="0">
-        <tr><td><b>Room</b></td><td><b>Capacity</b></td></tr>
     {% for room in queryset %}
-        <tr>
-            <td><a href="{% url 'a:detail' room.id %}">{{ room.name }}</a></td>
-            <td>{{room.capacity}}</td>
-        </tr>
+    <tr><td><a href="{% url 'a:detail' room.id %}">{{ room.name }}</a></td>
+        <td>{{room.capacity}}</td>
+    </tr>
     {% endfor %}
-    </table>
-<br>
+</table>
 
 <div class="pagination">
     <span class="step-links">
@@ -53,43 +45,25 @@
         {% endif %}
     </span>
 </div>
+
 <br><br>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <hr>
 {% block content %}
     <a href="{% url 'a:list' %}">Go back to the beginning of the search</a>
 {% endblock %}
-{% if messages %} <!--jesli jest wiadomosc, np. zle haslo przy logowaniu-->
-<ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
+
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
 {% endif %}
-{% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
-<p>You are logged in as: {{ user.username }}<br> <a href="{% url 'a:logout' %}">Log out</a></p>
+
+{% if user.is_authenticated %}
+    <p>You are logged in as: {{ user.username }}<br>
+       <a href="{% url 'a:logout' %}">Log out</a></p>
 {% endif %}
 
 </body>

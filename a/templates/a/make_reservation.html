@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Reservation result</title>
 </head>
 <body>
 
+{% if error_message %}
+    <p>{{ error_message }}</p>
 
-{% if error_message %}<p>{{ error_message }}</p>
 {% else %}
-
-You have successfully reserved the room from {{begin_time}} to {{end_time}} (nieprawda, nie sprawdzilem tego)
+    You have successfully reserved the room from {{begin_time}} to {{end_time}}
 
 {% endif %}
+
 {% block content %}
-<ul>
-    <a href="{% url 'a:list' %}">Go back to the main menu</a></li>
-</ul>
-
+    <a href="{% url 'a:list' %}">Go back to the main menu</a>
 {% endblock %}
-
-
-
 
 </body>
 </html>

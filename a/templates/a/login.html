@@ -1,31 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head><title>{% block title %}Login</title>{% endblock%}</head>
+<head><title>Login</title></head>
 <body>
 
 {% block content %}
 
-{% if messages %} <!--jesli jest wiadomosc, np. zle haslo przy logowaniu-->
-<ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
-{% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
-<p>You are logged in as: {{ user.username }}. <a href="{% url 'a:logout' %}">Log out</a></p>
+    {% if user.is_authenticated %}
+        <p>You are logged in as: {{ user.username }}.
+            <a href="{% url 'a:logout' %}">Log out</a></p>
 
-{% else %}
-You need to log in to search for a room.
-<p>
-<form action="{% url 'a:login' %}" method="POST">
-    {% csrf_token %} <!--pamietaj!!!-->
-    login:<input type="text" name="username"><br>
-    password:<input type="password" name="password"><br>
-    <input type="submit" value="Log in">
-</form>
-{% endif %}
+    {% else %}
+        You need to log in to search for a room.
+        <form action="{% url 'a:login' %}" method="POST">
+            {% csrf_token %}
+            login:<input type="text" name="username"><br>
+            password:<input type="password" name="password"><br>
+            <input type="submit" value="Log in">
+        </form>
+
+    {% endif %}
 
 {% endblock %}
 

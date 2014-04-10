@@ -1,36 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head><title>{% block title %}Choose your term</title>{% endblock%}</head>
+<body>
+
 <h1>{{ room.name }}</h1>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>
+{% if error_message %}
+    <p>{{ error_message }}</p>
 {% else %}
+    {% if room.terms.all %}
+        <table border="0">
+        <tr><td><b>Date</b></td>
+            <td><b>Time</b></td>
+            <td><b>Choose your hours</b></td>
+        </tr>
 
-{% if room.terms.all %}
+        {% for term in room.terms.all %}
 
-<table borderline="0">
-<tr><td><b>Date</b></td><td><b>Time</b></td><td><b>Choose your hours</b></td></tr>
+        <tr><td>{{term.date}}</td>
+            <td>{{term.begin_time}} - {{term.end_time}}</td>
+            <td><form action="{% url 'a:make_reservation' room.id term.id %}"
+                      method="POST">
+                {% csrf_token %}
+                From:<input type="time" name="begin_time">
+                to:<input type="time" name="end_time">
+                <input type="submit" value="Reserve">
+                </form>
+            </td>
+        </tr>
 
-
-
-
-
-{% for term in room.terms.all %}
-    <!-- zeby bylo ladniej, to mozna to jeszcze pogrupowac po datach -->
-
-
-
-<tr><td>{{term.date}}</td><td>{{term.begin_time}} - {{term.end_time}}</td>
-<td>
-
-    <form action="{% url 'a:make_reservation' room.id term.id %}" method="POST">
-        {% csrf_token %} <!--pamietaj!!!-->
-        <br>
-        From:<input type="time" name="begin_time">
-        to:<input type="time" name="end_time">
-        <input type="submit" value="Reserve">
-    </form>
-
-</td></tr>
-{% endfor %}
- </table>
+        {% endfor %}
+         </table>
 
     {% else %}
 
@@ -39,24 +39,16 @@
 
     {% endif %}
 
-<hr>
-{% if user.is_authenticated %} <!-- jesli user jest zalogowany-->
-<p>You are logged in as: {{ user.username }}<br> <a href="{% url 'a:logout' %}">Log out</a></p>
+    <hr>
+    {% if user.is_authenticated %}
+        <p>You are logged in as: {{ user.username }}<br>
+           <a href="{% url 'a:logout' %}">Log out</a></p>
+    {% endif %}
+
+
 {% endif %}
 
 
+</body>
+</html>
 
-
-
-{% endif %}
-
-
-
-
-    <br><br>
-
-
-
-
-<!--        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />  -->
