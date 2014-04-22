@@ -1,0 +1,1 @@
+przerzucić tworzenie z views do modeli (np. w klasie Term dac metode zrob rezerwacje, ktora swotrzy instacncje Reservation)
