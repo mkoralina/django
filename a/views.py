@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db import transaction
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from datetime import datetime
+
 
 from a.models import Reservation, Room, Term
 
@@ -19,84 +19,9 @@ def detail(request, room_id):
 @login_required
 @transaction.atomic
 def make_reservation(request, room_id, term_id):
-    try:
-        term = Term.objects.get(id=term_id)
-        room = Room.objects.get(id=room_id)
-    except(Term.DoesNotExist, Room.DoesNotExist):
-        return render(request, 'a/make_reservation.html',
-                      {'error_message': 'We are sorry, the term you wanted to '
-                                        'reserve is no longer available.'})
-    if request.method == "POST":
-        if request.POST['begin_time'] and request.POST['end_time']:
-            begin_time = request.POST['begin_time']
-            end_time = request.POST['end_time']
+    r = Reservation()
+    return r.make(request, room_id, term_id)
 
-            begin_time = datetime.strptime(begin_time, "%H:%M").time()
-            end_time = datetime.strptime(end_time, "%H:%M").time()
-
-            if begin_time < term.begin_time:
-                return render(request, 'a/make_reservation.html',
-                              {'error_message': 'Begin time exceeds the term'})
-
-            if end_time > term.end_time:
-                return render(request, 'a/make_reservation.html',
-                              {'error_message': 'End time exceeds the term'})
-
-            if begin_time > term.begin_time or end_time < term.end_time:
-
-                if begin_time > term.begin_time:
-                    # we need to make w new Term with time (term.begin_time; begin_time)
-                    # check if the term already exists
-                    try:
-                        new_term = Term.objects.get(date=term.date,
-                                                    begin_time=term.begin_time,
-                                                    end_time=begin_time)
-                    except Term.DoesNotExist:
-                        new_term = Term(date=term.date, begin_time=term.begin_time,
-                                        end_time=begin_time)
-                        new_term.save()
-
-                    room.terms.add(new_term)
-
-                if end_time < term.end_time:
-                    # check if the term already exists
-                    try:
-                        new_term = Term.objects.get(date=term.date,
-                                                    begin_time=end_time,
-                                                    end_time=term.end_time)
-                    except Term.DoesNotExist:
-                        new_term = Term(date=term.date, begin_time=end_time,
-                                        end_time=term.end_time)
-                        new_term.save()
-                    room.terms.add(new_term)
-
-                #create new term between new times
-                new_term = Term(date=term.date, begin_time=begin_time,
-                                end_time=end_time)
-                new_term.save()
-                room.terms.remove(term)
-                rooms = Room.objects.all()
-                rooms = rooms.filter(terms=term)
-                if rooms:
-                    pass
-                else:
-                    term.delete()
-                term = new_term
-
-            else:
-                room.terms.remove(term)
-
-            r = Reservation(room=room, term=term, user=request.user)
-            r.save()
-            return render(request, 'a/make_reservation.html',
-                          {'begin_time': begin_time, 'end_time': end_time,
-                           'room_name': room.name})
-
-        else:
-            return render(request, 'a/make_reservation.html',
-                          {'error_message': 'Give both begin and end time'})
-    else:
-        return render(request, 'a/make_reservation.html')
 
 
 def log_in(request):
