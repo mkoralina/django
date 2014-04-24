@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 admin.site.register(Reservation)
-
+admin.site.register(Term)
 
 class RoomForm(forms.ModelForm):
     class Meta:
@@ -30,25 +30,25 @@ class RoomAdmin(admin.ModelAdmin):
     form = RoomForm
 
 
-class TermForm(forms.ModelForm):
-    class Meta:
-        model = Term
-        fields = ['date', 'begin_time', 'end_time']
+#class TermForm(forms.ModelForm):
+#   class Meta:
+#        model = Term
+#        fields = ['date', 'begin_time', 'end_time']
         #exclude = ['date']
 
-    def clean(self):
-        cleaned_data = super(TermForm, self).clean()
-        begin_time = cleaned_data.get('begin_time')
-        end_time = cleaned_data.get('end_time')
+   # def clean(self):
+   #     cleaned_data = super(TermForm, self).clean()
+   #     begin_time = cleaned_data.get('begin_time')
+   #     end_time = cleaned_data.get('end_time')
 
-        if end_time < begin_time:
-            raise forms.ValidationError("End time must not be greater than begin time")
-        return cleaned_data
+  #      if end_time < begin_time:
+  #          raise forms.ValidationError("End time must not be greater than begin time")
+    #    return cleaned_data
 
 
-class TermAdmin(admin.ModelAdmin):
-    form = TermForm
+#class TermAdmin(admin.ModelAdmin):
+#    form = TermForm
 
 admin.site.register(Room, RoomAdmin)
-admin.site.register(Term, TermAdmin)
+#admin.site.register(Term, TermAdmin)
 

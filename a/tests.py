@@ -44,6 +44,18 @@ class TermTestCase(TestCase):
             error = 1
         self.assertEqual(error,1)
 
+    def test_wrong_term(self):
+        error = False
+        try:
+            term = Term.objects.create(date="2014-03-22", begin_time='14:00',
+                                end_time='10:00')
+            term.clean()
+        except:
+            error = True
+        self.assertTrue(error)
+
+
+
 class ReservationTestCase(TestCase):
     def setUp(self):
         Term.objects.create(date="2014-03-22", begin_time='14:00',

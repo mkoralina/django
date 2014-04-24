@@ -1,9 +1,9 @@
 from django.db import models
-import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 
 class Term(models.Model):
@@ -16,6 +16,19 @@ class Term(models.Model):
 
     class Meta:
         unique_together = ("date", "begin_time", "end_time")
+
+    def clean(self, *args, **kwargs):
+        wrong_time = False
+        try:
+            if self.end_time < self.begin_time:
+                wrong_time = True
+                raise ValidationError("End time must not be greater than begin time")
+        except:
+            if wrong_time:
+                raise ValidationError("End time must not be greater than begin time")
+            else:
+                raise ValidationError("Time must be within range 00:00 - 23:59")
+        super(Term, self).clean(*args, **kwargs)
 
 
 # Class Room with basic info about the room to reserve
