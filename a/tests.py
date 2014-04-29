@@ -49,7 +49,9 @@ class TermTestCase(TestCase):
         try:
             term = Term.objects.create(date="2014-03-22", begin_time='14:00',
                                 end_time='10:00')
-            term.clean()
+
+            term.save()
+            #term.clean()
         except:
             error = True
         self.assertTrue(error)

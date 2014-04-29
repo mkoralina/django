@@ -67,10 +67,18 @@ def list(request):
 
         if request.POST['keyword']:
             word = request.POST['keyword']
-            if word.isdigit():
-                queryset = queryset.filter(Q(name__contains=word) | Q(capacity=word) | Q(description__contains=word))
-            else:
-                queryset = queryset.filter(Q(name__contains=word) | Q(description__contains=word))
+            #if word.isdigit():
+            #    queryset = queryset.filter(Q(name__contains=word) | Q(capacity=word) | Q(description__contains=word))
+            #else:
+            queryset = queryset.filter(Q(name__contains=word) | Q(description__contains=word))
+
+        if request.POST['min_capacity'] and request.POST['max_capacity']:
+            min_capacity = request.POST['min_capacity']
+            max_capacity = request.POST['max_capacity']
+            if min_capacity > max_capacity:
+                messages.error(request, 'Minimum capacity must not be greater than maximum capacity')
+                return redirect('a:list')
+            queryset = queryset.filter(Q(capacity__gte=min_capacity) & Q(capacity__lte=max_capacity))
 
     paginator = Paginator(queryset, 10)
     # Make sure page request is an int. If not, deliver first page.

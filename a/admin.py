@@ -1,10 +1,16 @@
 from django.contrib import admin
-from a.models import Term, Room, Reservation
+from a.models import Term, Room, Reservation, Equipment, BlackBoard, WhiteBoard, Scanner, Note, Projector
 from django import forms
 from django.core.exceptions import ValidationError
 
 admin.site.register(Reservation)
 admin.site.register(Term)
+admin.site.register(Scanner)
+admin.site.register(WhiteBoard)
+admin.site.register(BlackBoard)
+admin.site.register(Note)
+admin.site.register(Projector)
+
 
 class RoomForm(forms.ModelForm):
     class Meta:
@@ -23,6 +29,25 @@ class RoomForm(forms.ModelForm):
                     else:
                         raise ValidationError("The terms you want to add coincide.")
         return terms
+
+    def clean_equipment(self):
+        room = self.cleaned_data['id']
+        capacity = self.cleaned_data['capacity']
+        found = False
+        if capacity < 15:
+            boards = WhiteBoard.objects.all()
+            for b in boards:
+                found |= b.rooms.filter()
+            if not found:
+                raise ValidationError("A room with fewer than 15 seats must have a white board.")
+
+        if capacity > 15:
+            boards = BlackBoard.objects.all()
+            for b in boards:
+                found |= b.__class__.__name__ == "BlackBoard"
+            if not found:
+                raise ValidationError("A room with more than 15 seats must have a black board.")
+
 
 
 class RoomAdmin(admin.ModelAdmin):

@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from datetime import datetime
 from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 
 class Term(models.Model):
@@ -30,6 +32,10 @@ class Term(models.Model):
                 raise ValidationError("Time must be within range 00:00 - 23:59")
         super(Term, self).clean(*args, **kwargs)
 
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Term, self).save(*args, **kwargs)
+
 
 # Class Room with basic info about the room to reserve
 class Room(models.Model):
@@ -40,6 +46,41 @@ class Room(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class Equipment(models.Model):
+    serial_number = models.SlugField(max_length=8)
+    rooms = models.ManyToManyField(Room, null=True, blank=True)
+
+    class Meta:
+        abstract = False
+
+    def __unicode__(self):
+        return '{0}: {1}'.format(self.__class__.__name__, self.serial_number)
+
+class Projector(Equipment):
+    pass
+
+
+class Note(models.Model):
+    content = models.CharField(max_length=200)
+
+
+class Board(Equipment):
+    notes = models.ManyToManyField(Note, null=True, blank=True)
+
+class BlackBoard(Board):
+    pass
+
+
+class WhiteBoard(Board):
+    pass
+
+
+class Scanner(Equipment):
+    pass
+
+
 
 
 class Reservation(models.Model):
