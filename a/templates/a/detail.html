@@ -1,6 +1,28 @@
 <!DOCTYPE html>
 <html>
-<head><title>{% block title %}Choose your term</title>{% endblock%}</head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!--ajax-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+    {% load staticfiles %}
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    <style type="text/css">
+    /*calosc stylow*/
+
+    </style>
+
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    {% load staticfiles %}
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+
+
+
+    <title>{% block title %}Choose your term</title>{% endblock%}
+
+</head>
 <body>
 
 <h1>{{ room.name }}</h1>
@@ -8,7 +30,55 @@
 {% if error_message %}
     <p>{{ error_message }}</p>
 {% else %}
+
+
+
+
+
     {% if room.terms.all %}
+
+
+        {% regroup room.terms.all by date as terms_list %}
+
+
+
+
+        {% for date in terms_list %}
+
+        {% with forloop.counter|stringformat:"s" as id %}
+        {% with "collapse"|add:id as collapse_id %}
+        {% with "#collapse"|add:id as href_collapse %}
+
+        <div class="panel-group" id="accordion{{ forloop.counter }}">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion{{ forloop.counter }}" href="#collapse{{ forloop.counter }}" >
+                Data: {{ date.grouper }} <br>
+                Date_id: "#collapse<%= forloop.counter %>" <br>
+                </a>
+                </h4>
+            </div>
+            <div id="collapse{{ forloop.counter }}" class=" panel-collapse collapse">
+                <div class="panel-body">
+                Lista godzin:
+                {% for item in date.list %}
+                    <li>{{item.begin_time}} - {{item.end_time}}</li>
+                {% endfor %}
+
+                </div>
+            </div>
+        </div>
+        </div>
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+
+
+        {% endfor %}
+
+
+
         <table border="0">
         <tr><td><b>Date</b></td>
             <td><b>Time</b></td>
