@@ -54,8 +54,12 @@
             <div class="panel-heading">
                 <h4 class="panel-title">
                 <a data-toggle="collapse" data-parent="#accordion{{ forloop.counter }}" href="#collapse{{ forloop.counter }}" >
-                Data: {{ date.grouper }} <br>
-                Date_id: "#collapse<%= forloop.counter %>" <br>
+                Data: {{ date.grouper }} (
+                {% for item in date.list %}
+                    {{item.begin_time}} - {{item.end_time}},
+                {% endfor %}
+                )
+
                 </a>
                 </h4>
             </div>
@@ -77,30 +81,6 @@
 
         {% endfor %}
 
-
-
-        <table border="0">
-        <tr><td><b>Date</b></td>
-            <td><b>Time</b></td>
-            <td><b>Choose your hours</b></td>
-        </tr>
-
-        {% for term in room.terms.all %}
-
-        <tr><td>{{term.date}}</td>
-            <td>{{term.begin_time}} - {{term.end_time}}</td>
-            <td><form action="{% url 'a:make_reservation' room.id term.id %}"
-                      method="POST">
-                {% csrf_token %}
-                From:<input type="time" name="begin_time">
-                to:<input type="time" name="end_time">
-                <input type="submit" value="Reserve">
-                </form>
-            </td>
-        </tr>
-
-        {% endfor %}
-         </table>
 
     {% else %}
 

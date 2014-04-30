@@ -6,6 +6,7 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from model_utils.managers import InheritanceManager
 
 
 class Term(models.Model):
@@ -37,29 +38,16 @@ class Term(models.Model):
         super(Term, self).save(*args, **kwargs)
 
 
-# Class Room with basic info about the room to reserve
-class Room(models.Model):
-    name = models.CharField(max_length=30)
-    capacity = models.IntegerField()
-    description = models.CharField(max_length=100)
-    terms = models.ManyToManyField(Term)
-
-    def __unicode__(self):
-        return self.name
-
-
 class Equipment(models.Model):
-    serial_number = models.SlugField(max_length=8)
-    rooms = models.ManyToManyField(Room, null=True, blank=True)
+    serial_number = models.IntegerField(max_length=8, primary_key=True)
+    name = models.CharField(max_length=20)
+    #objects = InheritanceManager()
 
     class Meta:
-        abstract = False
+        abstract = True
 
     def __unicode__(self):
         return '{0}: {1}'.format(self.__class__.__name__, self.serial_number)
-
-class Projector(Equipment):
-    pass
 
 
 class Note(models.Model):
@@ -67,19 +55,48 @@ class Note(models.Model):
 
 
 class Board(Equipment):
+    WHITE = 'white'
+    BLACK = 'black'
+    COLOR_CHOICES = ((WHITE, 'white'), (BLACK, 'black'),)
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default=BLACK)
     notes = models.ManyToManyField(Note, null=True, blank=True)
 
-class BlackBoard(Board):
-    pass
+    def __unicode__(self):
+        return '{0}board :{1}'.format(self.color, self.serial_number)
+
+    def save(self):
+        self.name = '{0}board'.format(self.color)
+        super(Board, self).save
 
 
-class WhiteBoard(Board):
-    pass
+# Class Room with basic info about the room to reserve
+class Room(models.Model):
+    name = models.CharField(max_length=30)
+    capacity = models.IntegerField()
+    description = models.CharField(max_length=100)
+    terms = models.ManyToManyField(Term)
+    boards = models.ManyToManyField(Board)
 
+    def __unicode__(self):
+        return self.name
 
-class Scanner(Equipment):
-    pass
+class Mobile(models.Model):
+    rooms = models.ManyToManyField(Room, null=True, blank=True)
 
+class Projector(Equipment, Mobile):
+    def save(self):
+        self.name = 'projector'
+        super(Projector, self).save
+
+class Scanner(Equipment, Mobile):
+    def save(self):
+        self.name = 'scanner'
+        super(Scanner, self).save
+
+class Printer(Equipment, Mobile):
+    def save(self):
+        self.name = 'printer'
+        super(Printer, self).save
 
 
 

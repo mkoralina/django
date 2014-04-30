@@ -7,7 +7,7 @@ from django.db import transaction
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 
-from a.models import Reservation, Room, Term
+from a.models import Reservation, Room, Term, Equipment, Projector, Scanner, Board, Printer
 
 
 @login_required
@@ -80,6 +80,14 @@ def list(request):
                 return redirect('a:list')
             queryset = queryset.filter(Q(capacity__gte=min_capacity) & Q(capacity__lte=max_capacity))
 
+        if request.POST.get('projector', False):
+            projectors = Projector.objects.all()
+            rooms = []
+            for p in projectors:
+                for r in p.rooms:
+                    rooms.append(r.id)
+            queryset = queryset.filter(id__in=rooms)
+
     paginator = Paginator(queryset, 10)
     # Make sure page request is an int. If not, deliver first page.
     try:
@@ -93,4 +101,4 @@ def list(request):
     except (EmptyPage, InvalidPage):
         queryset = paginator.page(paginator.num_pages)
 
-    return render(request, 'a/list.html', {'queryset': queryset})
+    return render(request, 'a/list.html', {'queryset': queryset })
