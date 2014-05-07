@@ -7,7 +7,7 @@ from django.db import transaction
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 
-from a.models import Reservation, Room, Term, Equipment, Projector, Scanner, Board, Printer
+from a.models import Reservation, Room, Term, Equipment, Board
 
 
 @login_required
@@ -81,11 +81,68 @@ def list(request):
             queryset = queryset.filter(Q(capacity__gte=min_capacity) & Q(capacity__lte=max_capacity))
 
         if request.POST.get('projector', False):
-            projectors = Projector.objects.all()
+            rooms_all = Room.objects.all()
             rooms = []
-            for p in projectors:
-                for r in p.rooms:
-                    rooms.append(r.id)
+            # iteruje po wszytskich pokojach
+            for r in rooms_all:
+                yet = False
+                # i po calym sprzecie w nich
+                for e in r.equipment_items.all():
+                    #jesli jest projektor, to dorzucam do listy
+                    if e.type == 'projector' and not yet:
+                        rooms.append(r.id)
+            queryset = queryset.filter(id__in=rooms)
+
+        if request.POST.get('printer', False):
+            rooms_all = Room.objects.all()
+            rooms = []
+            # iteruje po wszytskich pokojach
+            for r in rooms_all:
+                yet = False
+                # i po calym sprzecie w nich
+                for e in r.equipment_items.all():
+                    #jesli jest drukarka, to dorzucam do listy
+                    if e.type == 'printer' and not yet:
+                        rooms.append(r.id)
+            queryset = queryset.filter(id__in=rooms)
+
+        if request.POST.get('scanner', False):
+            rooms_all = Room.objects.all()
+            rooms = []
+            # iteruje po wszytskich pokojach
+            for r in rooms_all:
+                yet = False
+                # i po calym sprzecie w nich
+                for e in r.equipment_items.all():
+                    #jesli jest, to dorzucam do listy
+                    if e.type == 'scanner' and not yet:
+                        rooms.append(r.id)
+            queryset = queryset.filter(id__in=rooms)
+
+        if request.POST.get('whiteboard', False):
+            rooms_all = Room.objects.all()
+            rooms = []
+            # iteruje po wszytskich pokojach
+            for r in rooms_all:
+                yet = False
+                # i po calym sprzecie w nich
+                for e in r.boards.all():
+                    #jesli jest, to dorzucam do listy
+                    if e.type == 'whiteboard' and not yet:
+                        rooms.append(r.id)
+            queryset = queryset.filter(id__in=rooms)
+
+        if request.POST.get('blackboard', False):
+            rooms_all = Room.objects.all()
+            rooms = []
+            # iteruje po wszytskich pokojach
+            for r in rooms_all:
+                yet = False
+                # i po calym sprzecie w nich
+                for e in r.boards.all():
+                    #jesli jest, to dorzucam do listy
+                    if e.type == 'blackboard' and not yet:
+                        rooms.append(r.id)
             queryset = queryset.filter(id__in=rooms)
 
     paginator = Paginator(queryset, 10)

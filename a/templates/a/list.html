@@ -15,6 +15,10 @@
         width: 7em;
     }
 
+    td {
+        padding: 10px;
+    }
+
     </style>
 
     <title>{% block title %}Main</title>{% endblock%}
@@ -120,46 +124,15 @@ Lista godzin:
 </div>
 
 
+<div id='loadingmessage' style='display:none'>
+       <img src="{% static 'ajax-loader.gif' %}"/>
+</div>
 
-<form action="{% url 'a:list' %}" id="form_order" method="POST">
-    {% csrf_token %}
-    Search
-    <input type="text" name="keyword">
-    in description or name. <br>
-    Capacity from:
-    <input type="number" name="min_capacity">
-    to:
-    <input type="number" name="max_capacity">
-    <br>
-
-    <br>
-    Required equipment:<br>
-    <input type="checkbox" name="projector"> Projector<br>
-    <input type="checkbox" name="whiteboard"> Whiteboard<br>
-    <input type="checkbox" name="blackboard"> Blackboard<br>
-    <input type="checkbox" name="scanner"> Scanner<br>
-    <input type="checkbox" name="printer"> Printer<br>
-
-<input type="submit" class="btn btn-large" value="Search">
-    <br><br><br>
-
-
-</form>
-
-<select name="order" form="form_order" onchange="this.form.submit()">
-    <option value="'0'">Choose order of display</option>
-    <option value="alph">A-Z</option>
-    <option value="alph_inv">Z-A</option>
-    <option value="cap">by capacity ascending</option>
-    <option value="cap_inv">by capacity descending</option>
-</select><br><br>
-
-
-
-
-
-
-Rooms with their capacities: <br><br>
+<div class="main_div">
+<table align="center">
+<tr>
+    <td>
+    Rooms with their capacities: <br><br>
 <table border="0">
     <tr><td><b>Room</b></td>
         <td><b>Capacity</b></td>
@@ -195,6 +168,51 @@ Rooms with their capacities: <br><br>
             <a href="?page={{ queryset.next_page_number }}">next</a>
         {% endif %}
     </span>
+</div>
+        </td>
+    <td align="right">
+
+<form action="{% url 'a:list' %}" id="form_order" method="POST">
+    {% csrf_token %}
+    Search
+    <input type="text" name="keyword">
+    in description or name. <br>
+    Capacity from:
+    <input type="number" name="min_capacity">
+    to:
+    <input type="number" name="max_capacity">
+    <br>
+
+    <br>
+    Required equipment:<br>
+    <input type="checkbox" name="projector"> Projector<br>
+    <input type="checkbox" name="whiteboard"> Whiteboard<br>
+    <input type="checkbox" name="blackboard"> Blackboard<br>
+    <input type="checkbox" name="scanner"> Scanner<br>
+    <input type="checkbox" name="printer"> Printer<br>
+
+<input type="submit" class="btn btn-large" value="Search">
+    <br><br><br>
+
+
+</form>
+
+<select name="order" form="form_order" onchange="this.form.submit()">
+    <option value="'0'">Choose order of display</option>
+    <option value="alph">A-Z</option>
+    <option value="alph_inv">Z-A</option>
+    <option value="cap">by capacity ascending</option>
+    <option value="cap_inv">by capacity descending</option>
+</select><br><br>
+
+
+</td>
+    </tr></table>
+
+
+
+
+
 </div>
 
 <br><br>
@@ -270,11 +288,14 @@ $(".btn-room").click(function() {
         url = "/a/" + id + "/"
        // alert("wybrales sale " + $(this).attr('id') + "adres http:// : " + url)
 
+        $('#loadingmessage').show();
+
         var jqxhr = $.ajax(url, {type:"GET",
             data: {'room_id': id} } )
         .done(function(data) {
             console.log( "success" );
             $("#modalContent").html(data);
+            $('#loadingmessage').hide();
             })
         .fail(function() {
             console.log( "error" );
@@ -283,6 +304,8 @@ $(".btn-room").click(function() {
             console.log( "complete" );
             });
         });
+
+
 
     </script>
 

@@ -37,47 +37,36 @@ class Term(models.Model):
         self.clean()
         super(Term, self).save(*args, **kwargs)
 
-    def hours(self):
-        hours = []
-        start = self.begin_time.hour
-        end = self.end_time.hour
-        for i in range(start, end):
-            hours.append(i)
-        sorted(hours, key=int)
-        return hours
-
 
 class Equipment(models.Model):
-    PROJECTOR = 'projector'
-    SCANNER = 'scanner'
-    PRINTER = 'printer'
-    TYPE_CHOICES = ((PROJECTOR, 'projector'), (PRINTER, 'printer'), (SCANNER, 'scanner'))
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    serial_number = models.IntegerField(max_length=8, primary_key=True)
     name = models.CharField(max_length=20, null=True)
+    #objects = InheritanceManager()
+
+    class Meta:
+        abstract = False
 
     def __unicode__(self):
-        #return self.name
-        return '{0}: {1}'.format(self.type, self.name)
+        return '{0}: {1}'.format(self.__class__.__name__, self.serial_number)
 
 
 class Note(models.Model):
     content = models.CharField(max_length=200)
 
-    def __unicode__(self):
-        return self.content
 
-
-class Board(models.Model):
-    WHITE = 'whiteboard'
-    BLACK = 'blackboard'
-    COLOR_CHOICES = ((WHITE, 'whiteboard'), (BLACK, 'blackboard'),)
-    type = models.CharField(max_length=20, choices=COLOR_CHOICES, default=BLACK)
-    #notes = models.CharField(max_length=200, null=True)
+class Board(Equipment):
+    WHITE = 'white'
+    BLACK = 'black'
+    COLOR_CHOICES = ((WHITE, 'white'), (BLACK, 'black'),)
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default=BLACK)
     notes = models.ManyToManyField(Note, null=True, blank=True)
-    name = models.CharField(max_length=20, null=True)
 
     def __unicode__(self):
-        return '{0}: {1}'.format(self.type, self.name)
+        return '{0}board :{1}'.format(self.color, self.serial_number)
+
+    def save(self, *args, **kwargs):
+        self.name = '{0}board'.format(self.color)
+        super(Board, self).save(*args, **kwargs)
 
 
 # Class Room with basic info about the room to reserve
@@ -86,12 +75,32 @@ class Room(models.Model):
     capacity = models.IntegerField()
     description = models.CharField(max_length=100)
     terms = models.ManyToManyField(Term)
-    equipment_items= models.ManyToManyField(Equipment, null=True, blank=True)
-    boards = models.ManyToManyField(Board, null=False)
+    boards = models.ManyToManyField(Board)
 
     def __unicode__(self):
         return self.name
 
+class Mobile(models.Model):
+    rooms = models.ManyToManyField(Room, null=True, blank=True)
+
+#   druga juz nie moze byc Meta, bo bedzie ignorowana
+#    class Meta:
+#        abstract = True
+
+class Projector(Mobile, Equipment):
+    def clean(self):
+        self.name = 'projector'
+        super(Projector, self).clean()
+
+class Scanner(Mobile, Equipment):
+    def clean(self):
+        self.name = 'scanner'
+        super(Scanner, self).clean()
+
+class Printer(Mobile, Equipment):
+    def clean(self):
+        self.name = 'printer'
+        super(Printer, self).clean()
 
 class Reservation(models.Model):
     room = models.ForeignKey(Room)

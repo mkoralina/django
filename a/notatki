@@ -1,0 +1,8 @@
+class Equipment(models.Model):
+    #equipment_id = models.AutoField(primary_key=True)
+    serial_number = models.IntegerField(max_length=8, primary_key=True)
+    #serial_number = models.IntegerField(max_length=8, null=True)
+    name = models.CharField(max_length=20, null=True)
+    #objects = InheritanceManager()
+
+

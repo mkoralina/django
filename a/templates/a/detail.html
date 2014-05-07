@@ -54,20 +54,46 @@
             <div class="panel-heading">
                 <h4 class="panel-title">
                 <a data-toggle="collapse" data-parent="#accordion{{ forloop.counter }}" href="#collapse{{ forloop.counter }}" >
-                Data: {{ date.grouper }} (
+
+
+
+                Date: {{ date.grouper }} (
                 {% for item in date.list %}
-                    {{item.begin_time}} - {{item.end_time}},
+                    {{item.begin_time.hour}} - {{item.end_time.hour}},
                 {% endfor %}
                 )
 
                 </a>
                 </h4>
             </div>
-            <div id="collapse{{ forloop.counter }}" class=" panel-collapse collapse">
+            <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
                 <div class="panel-body">
-                Lista godzin:
+
+                    <!-- GLOWNA CZESC MODALA -->
+                <div class="btn-group" data-toggle="buttons">
+
+                available hours: <br><br>
                 {% for item in date.list %}
-                    <li>{{item.begin_time}} - {{item.end_time}}</li>
+
+
+                    {% for hour in item.hours %}
+
+                    <label id="hour{{ hour }}" class="btn btn-primary btn-hour">
+                    <input type="checkbox"> {{ hour }} - {{ hour|add:"1" }}
+                    </label>
+
+
+                    {% endfor %}
+
+
+
+                {% endfor %}
+
+
+                <br><br>
+                    Lista godzin:
+                {% for item in date.list %}
+                    <li>{{item.begin_time.hour}} - {{item.end_time.hour}}</li>
                 {% endfor %}
 
                 </div>
@@ -85,7 +111,6 @@
     {% else %}
 
     There are no terms available.
-    <a href="{% url 'a:list' %}">Choose a different room.</a>
 
     {% endif %}
 
@@ -97,6 +122,18 @@
 
 
 {% endif %}
+
+<script>
+
+$(".btn-hour").click(function() {
+        $(this).attr('disabled', false)
+
+
+        });
+
+    </script>
+
+
 
 
 </body>
