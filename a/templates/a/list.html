@@ -30,34 +30,6 @@
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="http://getbootstrap.com/2.3.2/assets/js/bootstrap-tooltip.js"></script>
 
-    <!--
-<script type="text/javascript">
-function ajaxFunction()
-{
-var xmlhttp;
-if (window.XMLHttpRequest)
-  {
-  // code for IE7+, Firefox, Chrome, Opera, Safari
-  xmlhttp=new XMLHttpRequest();
-  }
-else if (window.ActiveXObject)
-  {
-  // code for IE6, IE5
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-  }
-else
-  {
-  alert("Your browser does not support XMLHTTP!");
-  }
-}
-</script>
-
-
-
-
--->
-
-
 
 
 
@@ -85,7 +57,7 @@ else
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        <h4 class="modal-title" id="myModalLabel">Available dates</h4>
       </div>
       <div id="modalContent" class="modal-body"> <!-- TUTAJ LADUJ TRESC AJAXEM -->
         <p>One fine body&hellip;</p>
@@ -311,31 +283,6 @@ $(".btn-room").click(function() {
 
 <!-- koniec skryptu z Ciebiery-->
 
-
-<script>
-    var r;
-    var e;
-
-function odbierzDane()
-{
-  if (r.readyState == 4) {
-    if (r.status == 200 || r.status == 304) {
-      e.innerHTML = r.responseText;
-    }
-  }
-}
-
-function setContent(adresurl, htmlid)
-{
-  if (r = getXMLHttpRequest()) {
-    e = document.getElementById(htmlid);
-    r.open('GET', adresurl);
-    r.onreadystatechange = odbierzDane;
-    r.send(null);
-  }
-}
-
-</script>
 
 
 

@@ -6,3 +6,88 @@ class Equipment(models.Model):
     #objects = InheritanceManager()
 
 
+
+                <form action="{% url 'make_reservation' room.id term.id %}" method="post">
+                {% csrf_token %}
+
+
+
+
+            try:
+                if hours:
+                    start = hours[0]
+                    end = hours[0] + 1
+                    for i in range (1, hours.__len__()):
+                        if hours[i] == hours[i-1] + 1:
+                            end = hours[i] + 1
+                        else:
+
+
+                            begin_time = datetime.strptime(start, "%H:%M").time()
+                            end_time = datetime.strptime(end, "%H:%M").time()
+
+                            #try:
+                            term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time)
+                            room = Room.objects.select_for_update().get(id=room_id)
+                            #except(Term.DoesNotExist, Room.DoesNotExist):
+                            #    return render(request, 'a/make_reservation.html',
+                            #          {'error_message': 'We are sorry, the term you wanted to '
+                            #                            'reserve is no longer available.'})
+
+                            r = Reservation()
+
+                            term = r.prepare_term(begin_time, end_time, term, room)
+                            r.reserve(room, term, request.user)
+
+
+                            start = hours[i]
+                            end = hours[i] + 1
+
+                    # uwaga! copy paste ! -> dac funcje
+                    begin_time = datetime.strptime(start, "%H:%M").time()
+                    end_time = datetime.strptime(end, "%H:%M").time()
+
+                    #try:
+                    term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time)
+                    room = Room.objects.select_for_update().get(id=room_id)
+                    #except(Term.DoesNotExist, Room.DoesNotExist):
+                    #    return render(request, 'a/make_reservation.html',
+                    #          {'error_message': 'We are sorry, the term you wanted to '
+                    #                            'reserve is no longer available.'})
+
+                    r = Reservation()
+
+                    term = r.prepare_term(begin_time, end_time, term, room)
+                    r.reserve(room, term, request.user)
+
+
+            except:
+                #return redirect('a:list')
+                raise StandardError("Impossible to reserve. Terms unavailable.")
+
+
+
+
+
+            # uwaga! copy paste ! -> dac funcje
+            begin_time = datetime.strptime(str(start), "%H").time()
+            end_time = datetime.strptime(str(end), "%H").time()
+
+            #try:
+            term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time)
+            room = Room.objects.select_for_update().get(id=room_id)
+            #except(Term.DoesNotExist, Room.DoesNotExist):
+            #    return render(request, 'a/make_reservation.html',
+            #          {'error_message': 'We are sorry, the term you wanted to '
+            #                            'reserve is no longer available.'})
+
+            r = Reservation()
+
+            term = r.prepare_term(begin_time, end_time, term, room)
+            r.reserve(room, term, request.user)
+        else:
+            Room.objects.create(name="ELSE", capacity=40,
+                    description='Chemistry labolatory')
+
+#        except:
+#            raise StandardError("Impossible to reserve. Terms unavailable.")

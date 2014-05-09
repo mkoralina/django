@@ -26,6 +26,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DATE_FORMAT = "Y-m-d"
 
 # Application definition
 
@@ -65,6 +66,12 @@ DATABASES = {
     }
 }
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'a.context_processors.global_vars',
+    'a.context_processors.increase_counter',
+)
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
@@ -74,7 +81,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -87,3 +94,5 @@ STATIC_URL = '/static/'
 # uwaga! moje wlasne
 
 LOGIN_URL = 'a:login'
+
+

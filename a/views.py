@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db import transaction
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from datetime import datetime
+import json
 
 
 from a.models import Reservation, Room, Term, Equipment, Board
@@ -18,9 +20,77 @@ def detail(request, room_id):
 
 @login_required
 @transaction.atomic
-def make_reservation(request, room_id, term_id):
-    r = Reservation()
-    return r.make(request, room_id, term_id)
+def make_reservation(request, room_id):
+    if request.method == "POST":
+        if 'date' in request.POST:
+            date = request.POST['date']
+            #date = datetime.strptime(date, "%M-%D-%Y").date()
+        else:
+            raise StandardError("no date in POST data")
+
+        #if 'hours' in request.POST or request.POST.getlist('hours'):
+        #a = request.POST['hours[]']
+        #hours = json.loads(a)
+        #set = request.POST.getlist.copy()
+        #for hour in set['hours[]']:
+        #    raise StandardError((set['hours[]']))
+        hours = request.POST.getlist('hours')
+
+        #try:
+
+        #hours = [12, 13, 14]
+
+        if len(hours) > 0:
+
+            #try:
+            for i in range (0, len(hours)):
+
+                start = hours[0]
+                end = hours[0] + 1
+
+                begin_time = datetime.strptime(str(start), "%H").time()
+                end_time = datetime.strptime(str(end), "%H").time()
+
+                room = Room.objects.select_for_update().get(id=room_id)
+                terms_id = []
+                for t in room.terms.all():
+                    terms_id.append(t.id)
+
+
+               # term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time, date=date, id__in=terms_id)
+                term = Term.objects.select_for_update().filter(Q(begin_time__lte=begin_time) |
+                                                               Q(end_time__gte=end_time) |
+                                                               Q(date=date) |
+                                                               Q(id__in=terms_id))
+
+
+
+                if not term:
+                    raise StandardError("termin nie znaleziony dla {0} - {1} dnia {2} w terminach: {3}".format(start, end, date, terms_id))
+
+                #except(Term.DoesNotExist, Room.DoesNotExist):
+                #    return render(request, 'a/make_reservation.html',
+                #          {'error_message': 'We are sorry, the term you wanted to '
+                #                            'reserve is no longer available.'})
+
+                r = Reservation()
+
+
+                #r.room = room
+                #r.user = request.user
+                #r.term = term[0]
+                #r.save()
+
+                term = r.prepare_term(begin_time, end_time, term[0], room)
+                r.reserve(room, term, request.user)
+
+
+            #except:
+            #    #return redirect('a:list')
+            #    raise StandardError("Impossible to reserve. Terms {0} - {1} unavailable.".format(start, end))
+
+    return redirect('a:list')
+
 
 
 
