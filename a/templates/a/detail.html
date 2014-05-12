@@ -6,15 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 
-    {% load staticfiles %}
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
-    <style type="text/css">
-        <!-- -->
-    </style>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    {% load staticfiles %}
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
 
 
 
@@ -39,16 +32,11 @@
 
         {% regroup room.terms.all by date as terms_list %}
 
-        <form id="main_form" action="{% url 'a:make_reservation' room.id %}" method="post" name="{{room.id}}">
-        {% csrf_token %}
-
         {% for date in terms_list %}
 
         {% with forloop.counter|stringformat:"s" as id %}
         {% with "collapse"|add:id as collapse_id %}
         {% with "#collapse"|add:id as href_collapse %}
-
-
 
         <div class="panel-group" id="accordion{{ forloop.counter }}">
             <div class="panel panel-default">
@@ -83,10 +71,11 @@
 
                             {% endfor %}
 
+
                         </div>
                     <br><br>
-                    <p id="demo1"></p>
-                    <input id="{{ item.date}}" class="btn btn-large btn-reserve" value="Reserve">
+                    <input id="reserve{{ date.grouper }}{{room.id}}" class="btn btn-default btn-large btn-reserve" value="Reserve">
+
                     </div>
                 </div>
             </div>
@@ -98,7 +87,7 @@
 
         {% endfor %}
 
-        </form>
+
 
         {% else %}
 
@@ -117,58 +106,12 @@
 
 
 <script>
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-var csrftoken = getCookie('csrftoken');
 
 var count = 0;
 
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
 
-function sameOrigin(url) {
-    // test that a given url is a same-origin URL
-    // url could be relative or scheme relative or absolute
-    var host = document.location.host; // host + port
-    var protocol = document.location.protocol;
-    var sr_origin = '//' + host;
-    var origin = protocol + sr_origin;
-    // Allow absolute or scheme relative URLs to same origin
-    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-        // or any other URL that isn't scheme relative or absolute i.e relative.
-        !(/^(\/\/|http:|https:).*/.test(url));
-}
-
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
-            // Send the token to same-origin, relative URLs only.
-            // Send the token only if the method warrants CSRF protection
-            // Using the CSRFToken value acquired earlier
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-});
-
-$(".btn-group :checkbox").change(function() {
-
+$(".btn-group :checkbox").change(function(e) {
+    e.preventDefault();
     if (this.checked) {
         count += 1;
     }
@@ -176,40 +119,36 @@ $(".btn-group :checkbox").change(function() {
         count -= 1;
     }
     $("#chosenCounter").html("You have chosen " + count + " hour(s) so far <br><br>");
-
-
 });
 
 $(".btn-reserve").click(function(e) {
         e.preventDefault();
         var hours = [];
-        var my_date;
+        var date;
+        var room_id;
 
         $(".btn-group :checked").each(function() {
-            hours.push(this.id);
-            console.log(this.id);
-            //room_id = this.name;
+            hours.push(this.id.substring(10));
         });
-        console.log({'h':hours.toString()});
-        //hours = JSON.stringify(hours)
-        room_id = $("#main_form").name
-        //alert(room_id);
-        my_date = this.id
+        //console.log({'h':hours.toString()});
+        //room_id = $("#main_form").name
+        console.log('room: ' + room_id)
+        date = this.id.substring(7,17)
+        room_id = this.id.substring(17)
+        console.log('id: ' + this.id)
+        console.log('hours: ' + hours)
+        console.log('date: ' + date)
 
-        //hours_2 = $("#" + room_id).serializeArray()
-
-        document.getElementById("demo1").innerHTML = hours;
-
-        return false;
-
-        console.log(csrftoken);
+        console.log('dla detail: ' + csrftoken);
         var jqxhr = $.ajax(
-                //room_id + "/make_reservation",
-                "make_reservation",
+                room_id + "/make_reservation",
+                //"make_reservation",
                 {
                 type: "POST",
                 //data: {'hours': '['+hours.toString()+']', 'room_id': room_id, 'date': my_date }
-                data: {'hours': hours, 'room_id': room_id, 'date': my_date }
+                data: {'hours': hours, 'room_id': room_id, 'date': date,
+                'csrfmiddlewaretoken': csrftoken}
+
         })
         .done(function(data) {
             console.log( "success" );

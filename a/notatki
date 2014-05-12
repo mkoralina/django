@@ -90,4 +90,48 @@ class Equipment(models.Model):
                     description='Chemistry labolatory')
 
 #        except:
-#            raise StandardError("Impossible to reserve. Terms unavailable.")
+#
+   raise StandardError("Impossible to reserve. Terms unavailable.")
+
+
+
+    <! -- action="{% url 'a:make_reservation' room.id %}" -->
+
+
+
+
+    <form id="main_form" action="{% url 'a:make_reservation' room.id %}" method="post" name="{{room.id}}">
+        {% csrf_token %}
+
+
+
+    </form>
+
+
+
+
+
+    {% load staticfiles %}
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    <style type="text/css">
+        <!-- -->
+    </style>
+
+    {% load staticfiles %}
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    {% load staticfiles %}
+    <script src="{% static 'jquery.min.js' %}"></script>
+
+    do orzedefiniowania save: (żeby zbijał w jeden blok)
+
+
+            terms_id = []
+        for t in room.terms.all():
+            terms_id.append(t.id)
+        try:
+            before_term = Term.objects.get(end_time=term.begin_time, id__in=terms_id)
+            after_term = Term.objects.get(begin_time=term.end_time, id__in=terms_id)
+
+            reservation = Reservation.objects.get(term.begin_time=term.end_time,
+                                                                  end_time__gte=end_time, date=date, id__in=terms_id)
+        except:

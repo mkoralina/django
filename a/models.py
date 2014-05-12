@@ -15,7 +15,7 @@ class Term(models.Model):
     end_time = models.TimeField()
 
     def __unicode__(self):
-        return '{0}, {1} - {2}'.format(self.date, self.begin_time, self.end_time)
+        return 'ID: {3}, {0}, {1} - {2}'.format(self.date, self.begin_time, self.end_time, self.id)
 
     class Meta:
         unique_together = ("date", "begin_time", "end_time")
@@ -43,7 +43,7 @@ class Term(models.Model):
         end = self.end_time.hour
         for i in range(start, end):
             hours.append(i)
-        sorted(hours, key=int)
+        sorted(hours)
         return hours
 
 
@@ -159,6 +159,21 @@ class Reservation(models.Model):
 
 
     def reserve(self, room, term, user):
+        my_reservations = Reservation.objects.all().filter(user=user)
+        joined = False
+        for r in my_reservations:
+            if r.term.date == term.date:
+                if r.term.end_time == term.begin_time:
+                    r.term.end_time = term.end_time
+
+                    joined = True
+                if r.term.begin_time == term.end_time:
+
+
+                joined = True
+
+
+
         self.room = room
         self.term = term
         self.user = user

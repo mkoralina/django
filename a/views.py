@@ -34,7 +34,8 @@ def make_reservation(request, room_id):
         #set = request.POST.getlist.copy()
         #for hour in set['hours[]']:
         #    raise StandardError((set['hours[]']))
-        hours = request.POST.getlist('hours')
+        hours = request.POST.getlist('hours[]')
+        #raise StandardError(hours)
 
         #try:
 
@@ -42,31 +43,37 @@ def make_reservation(request, room_id):
 
         if len(hours) > 0:
 
+            room = Room.objects.select_for_update().get(id=room_id)
+            terms_id = []
+
+
             #try:
             for i in range (0, len(hours)):
 
-                start = hours[0]
-                end = hours[0] + 1
+                start = int(hours[i])
+
+                end = int(hours[i]) + 1
+
+                #raise StandardError("tutaj")
 
                 begin_time = datetime.strptime(str(start), "%H").time()
                 end_time = datetime.strptime(str(end), "%H").time()
 
-                room = Room.objects.select_for_update().get(id=room_id)
-                terms_id = []
                 for t in room.terms.all():
                     terms_id.append(t.id)
 
+                #raise StandardError("{0} - {1} w roomie:{2}".format(terms_id,t.end_time, room.id))
+                try:
+                    term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time, date=date, id__in=terms_id)
+               # term = Term.objects.select_for_update().filter(Q(begin_time__lte=begin_time) |
+               #                                                Q(end_time__gte=end_time) |
+               #                                                Q(date=date) |
+               #                                                Q(id__in=terms_id))
 
-               # term = Term.objects.select_for_update().get(begin_time__lte=begin_time, end_time__gte=end_time, date=date, id__in=terms_id)
-                term = Term.objects.select_for_update().filter(Q(begin_time__lte=begin_time) |
-                                                               Q(end_time__gte=end_time) |
-                                                               Q(date=date) |
-                                                               Q(id__in=terms_id))
 
 
-
-                if not term:
-                    raise StandardError("termin nie znaleziony dla {0} - {1} dnia {2} w terminach: {3}".format(start, end, date, terms_id))
+                except:
+                    raise StandardError("termin nie znaleziony dla {0} - {1} dnia {2} i pokoju: {4} w terminach: {3} o id: {5}".format(start, end, date, room.terms.all(),room_id, terms_id))
 
                 #except(Term.DoesNotExist, Room.DoesNotExist):
                 #    return render(request, 'a/make_reservation.html',
@@ -81,15 +88,17 @@ def make_reservation(request, room_id):
                 #r.term = term[0]
                 #r.save()
 
-                term = r.prepare_term(begin_time, end_time, term[0], room)
+                term = r.prepare_term(begin_time, end_time, term, room)
                 r.reserve(room, term, request.user)
+
+                del terms_id[0:len(terms_id)]
 
 
             #except:
             #    #return redirect('a:list')
             #    raise StandardError("Impossible to reserve. Terms {0} - {1} unavailable.".format(start, end))
 
-    return redirect('a:list')
+    return render(request, 'a/detail.html', {'room': room})
 
 
 

@@ -23,12 +23,11 @@
 
     <title>{% block title %}Main</title>{% endblock%}
 
-    <!--{% load staticfiles %}
-    <script type="text/javascript" src="{% static 'jquery.js' %}"></script> -->
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    {% load staticfiles %}
+    <script src="{% static 'jquery.min.js' %}"></script>
     {% load staticfiles %}
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-    <script src="http://getbootstrap.com/2.3.2/assets/js/bootstrap-tooltip.js"></script>
+
 
 
 
@@ -49,9 +48,7 @@
 {% endif %}
 
 
-
-
-<!-- Modal -->
+<!-- modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -59,132 +56,92 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title" id="myModalLabel">Available dates</h4>
       </div>
-      <div id="modalContent" class="modal-body"> <!-- TUTAJ LADUJ TRESC AJAXEM -->
-        <p>One fine body&hellip;</p>
-
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-          Data 3 z godzinami Item #3
-        </a>
-      </h4>
-    </div>
-    <div id="collapseThree" class="panel-collapse collapse">
-      <div class="panel-body">
-Lista godzin:
-<br> godzina 1
-          <br> godzina 2
-          <br> godzina 3
-
+      <div id="modalContent" class="modal-body">
+      this content will be loaded by ajax
       </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
     </div>
   </div>
 </div>
 
-
-
-
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
+<!-- loading icon -->
 <div id='loadingmessage' style='display:none'>
-       <img src="{% static 'ajax-loader.gif' %}"/>
+  <img src="{% static 'ajax-loader.gif' %}"/>
 </div>
 
 <div class="main_div">
-<table align="center">
-<tr>
-    <td>
-    Rooms with their capacities: <br><br>
-<table border="0">
-    <tr><td><b>Room</b></td>
-        <td><b>Capacity</b></td>
+  <table align="center">
+    <tr>
+      <td>
+          Rooms with their capacities: <br><br>
+          <table border="0">
+            <tr><td><b>Room</b></td>
+                <td><b>Capacity</b></td>
+            </tr>
+
+            {% for room in queryset %}
+            <tr><td>
+                <button id="{{room.id}}" class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal">
+                {{ room.name }}
+                </button>
+                </td>
+                <td>{{room.capacity}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+
+          <div class="pagination">
+            <span class="step-links">
+                {% if queryset.has_previous %}
+                    <a href="?page={{ queryset.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
+                </span>
+
+                {% if queryset.has_next %}
+                    <a href="?page={{ queryset.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+          </div>
+      </td>
+      <td align="right">
+
+        <form action="{% url 'a:list' %}" id="form_order" method="POST">
+            {% csrf_token %}
+            Search
+            <input type="text" name="keyword">
+            in description or name. <br>
+            Capacity from:
+            <input type="number" name="min_capacity">
+            to:
+            <input type="number" name="max_capacity">
+            <br><br>
+
+            Required equipment:<br>
+            <input type="checkbox" name="projector"> Projector<br>
+            <input type="checkbox" name="whiteboard"> Whiteboard<br>
+            <input type="checkbox" name="blackboard"> Blackboard<br>
+            <input type="checkbox" name="scanner"> Scanner<br>
+            <input type="checkbox" name="printer"> Printer<br>
+
+            <input type="submit" class="btn btn-large" value="Search">
+            <br><br><br>
+        </form>
+
+        <select name="order" form="form_order" onchange="this.form.submit()">
+            <option value="'0'">Choose order of display</option>
+            <option value="alph">A-Z</option>
+            <option value="alph_inv">Z-A</option>
+            <option value="cap">by capacity ascending</option>
+            <option value="cap_inv">by capacity descending</option>
+        </select><br><br>
+      </td>
     </tr>
-
-    {% for room in queryset %}
-
-    <tr><td>
-        <button id="{{room.id}}" class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal"> <!-- onclick="$('#modalContent').html('http://students.mimuw.edu.pl/~mk334666/sudoku.html');">
-        <!--
-        <button id=room.id class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal" onclick="alert('kliknales');">
-        -->
-            <!--<a href="{% url 'a:detail' room.id%}">pokoj</a>-->
-        {{ room.name }}
-        </button>
-    </td>
-        <td>{{room.capacity}}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<div class="pagination">
-    <span class="step-links">
-        {% if queryset.has_previous %}
-            <a href="?page={{ queryset.previous_page_number }}">previous</a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
-        </span>
-
-        {% if queryset.has_next %}
-            <a href="?page={{ queryset.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
-        </td>
-    <td align="right">
-
-<form action="{% url 'a:list' %}" id="form_order" method="POST">
-    {% csrf_token %}
-    Search
-    <input type="text" name="keyword">
-    in description or name. <br>
-    Capacity from:
-    <input type="number" name="min_capacity">
-    to:
-    <input type="number" name="max_capacity">
-    <br>
-
-    <br>
-    Required equipment:<br>
-    <input type="checkbox" name="projector"> Projector<br>
-    <input type="checkbox" name="whiteboard"> Whiteboard<br>
-    <input type="checkbox" name="blackboard"> Blackboard<br>
-    <input type="checkbox" name="scanner"> Scanner<br>
-    <input type="checkbox" name="printer"> Printer<br>
-
-<input type="submit" class="btn btn-large" value="Search">
-    <br><br><br>
-
-
-</form>
-
-<select name="order" form="form_order" onchange="this.form.submit()">
-    <option value="'0'">Choose order of display</option>
-    <option value="alph">A-Z</option>
-    <option value="alph_inv">Z-A</option>
-    <option value="cap">by capacity ascending</option>
-    <option value="cap_inv">by capacity descending</option>
-</select><br><br>
-
-
-</td>
-    </tr></table>
-
-
-
-
-
+  </table>
 </div>
 
 <br><br>
@@ -194,20 +151,14 @@ Lista godzin:
     <a href="{% url 'a:list' %}">Go back to the beginning of the search</a>
 {% endblock %}
 
-
 {% if user.is_authenticated %}
     <p>You are logged in as: {{ user.username }}<br>
        <a href="{% url 'a:logout' %}">Log out</a></p>
 {% endif %}
 
 
-
-
-
-
-
-<!-- skrypt z Ciebiery -->
 <script>
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -225,6 +176,7 @@ function getCookie(name) {
 }
 
 var csrftoken = getCookie('csrftoken');
+
 
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
@@ -249,33 +201,36 @@ $.ajaxSetup({
             // Send the token to same-origin, relative URLs only.
             // Send the token only if the method warrants CSRF protection
             // Using the CSRFToken value acquired earlier
+            console.log("A");
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         }
     }
 });
 
-$(".btn-room").click(function() {
-        id = $(this).attr('id')
+$(".btn-room").click(function(e) {
+    e.preventDefault()
+    id = $(this).attr('id')
 
-        url = "/a/" + id + "/"
-       // alert("wybrales sale " + $(this).attr('id') + "adres http:// : " + url)
+    url = "/a/" + id + "/"
 
-        $('#loadingmessage').show();
+    $('#loadingmessage').show();
 
-        var jqxhr = $.ajax(url, {type:"GET",
-            data: {'room_id': id} } )
-        .done(function(data) {
-            console.log( "success" );
-            $("#modalContent").html(data);
-            $('#loadingmessage').hide();
-            })
-        .fail(function() {
-            console.log( "error" );
-            })
-        .always(function() {
-            console.log( "complete" );
-            });
-        });
+    console.log('token dla list: ' + csrftoken);
+
+    var jqxhr = $.ajax(url, {type:"GET",
+        data: {'room_id': id} } )
+    .done(function(data) {
+        console.log( "success" );
+        $("#modalContent").html(data);
+        $('#loadingmessage').hide();
+        })
+    .fail(function() {
+        console.log( "error" );
+        })
+    .always(function() {
+        console.log( "complete" );
+    });
+});
 
 
 
@@ -286,9 +241,9 @@ $(".btn-room").click(function() {
 
 
 
-
-
-
-
 </body>
 </html>
+
+
+
+
