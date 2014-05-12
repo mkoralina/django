@@ -5,13 +5,6 @@
     <!--ajax-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-
-
-
-
-
-
-
     <title>{% block title %}Choose your term</title>{% endblock%}
 
 </head>
@@ -47,7 +40,7 @@
                     Date: {{ date.grouper }}
                     (
                         {% for item in date.list %}
-                            {{item.begin_time.hour}} - {{item.end_time.hour}},
+                            {{item.begin_time.hour}}-{{item.end_time.hour}}
                         {% endfor %}
                     )
 
@@ -68,7 +61,7 @@
 
 
                                 {% endfor %}
-
+                                <br><br>
                             {% endfor %}
 
 
@@ -119,6 +112,10 @@ $(".btn-group :checkbox").change(function(e) {
         count -= 1;
     }
     $("#chosenCounter").html("You have chosen " + count + " hour(s) so far <br><br>");
+});
+
+$(".collapse").click(function() {
+   alert("sprawdz, czy dziala");
 });
 
 $(".btn-reserve").click(function(e) {

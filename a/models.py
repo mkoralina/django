@@ -157,23 +157,23 @@ class Reservation(models.Model):
             room.terms.remove(term)
         return term
 
+    def change(self, begin_time, end_time):
+        if self.term.end_time == begin_time:
+            pass
+        if self.term.begin_time == end_time:
+            pass
+
 
     def reserve(self, room, term, user):
-        my_reservations = Reservation.objects.all().filter(user=user)
-        joined = False
-        for r in my_reservations:
-            if r.term.date == term.date:
-                if r.term.end_time == term.begin_time:
-                    r.term.end_time = term.end_time
+#        my_reservations = Reservation.objects.all().filter(user=user)
+#        joined = False
+#        for r in my_reservations:
+#            if r.term.date == term.date:
+#                if r.term.end_time == term.begin_time or r.term.begin_time == term.end_time:
+#                    r.change(term.begin_time, term.end_time)
+#                    joined = True
 
-                    joined = True
-                if r.term.begin_time == term.end_time:
-
-
-                joined = True
-
-
-
+#        if not joined:
         self.room = room
         self.term = term
         self.user = user
