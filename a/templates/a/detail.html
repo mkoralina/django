@@ -9,7 +9,10 @@
 
 </head>
 <body>
-
+    Beware: you can reserve terms from one day at a time.
+    If you open a new date while on a different one
+    If you open a new date while on a different one
+    you will lose your previous choices.
     <h1>{{ room.name }}</h1>
 
     {% if error_message %}
@@ -25,26 +28,28 @@
 
         {% regroup room.terms.all by date as terms_list %}
 
+        <div class="panel-group" id="accordion">
+
         {% for date in terms_list %}
 
         {% with forloop.counter|stringformat:"s" as id %}
         {% with "collapse"|add:id as collapse_id %}
         {% with "#collapse"|add:id as href_collapse %}
 
-        <div class="panel-group" id="accordion{{ forloop.counter }}">
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion{{ forloop.counter }}" href="#collapse{{ forloop.counter }}" >
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}" >
 
-                    Date: {{ date.grouper }}
-                    (
-                        {% for item in date.list %}
-                            {{item.begin_time.hour}}-{{item.end_time.hour}}
-                        {% endfor %}
-                    )
+                        Date: {{ date.grouper }}
+                        (
+                            {% for item in date.list %}
+                                {{item.begin_time.hour}}-{{item.end_time.hour}}
+                            {% endfor %}
+                        )
 
-                    </a>
+                        </a>
                     </h4>
                 </div>
                 <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
@@ -72,7 +77,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+
 
         {% endwith %}
         {% endwith %}
@@ -80,7 +85,7 @@
 
         {% endfor %}
 
-
+        </div>
 
         {% else %}
 
@@ -102,7 +107,6 @@
 
 var count = 0;
 
-
 $(".btn-group :checkbox").change(function(e) {
     e.preventDefault();
     if (this.checked) {
@@ -114,8 +118,13 @@ $(".btn-group :checkbox").change(function(e) {
     $("#chosenCounter").html("You have chosen " + count + " hour(s) so far <br><br>");
 });
 
-$(".collapse").click(function() {
-   alert("sprawdz, czy dziala");
+$(".panel-heading").on('click',function() {
+    $('input[type=checkbox]').each(function(i)
+    {
+        if (this.checked) {
+            $(".btn-group label").eq(i).button('toggle');
+        }
+    });
 });
 
 $(".btn-reserve").click(function(e) {
@@ -154,7 +163,7 @@ $(".btn-reserve").click(function(e) {
             })
         .fail(function() {
             console.log( "error" );
-            alert("We are sorry but the room you have chosen is no longer available in the desirable time")
+            alert("We are sorry but i is impossible to make the reservation you wanted.")
             })
         .always(function() {
             console.log( "complete" );
