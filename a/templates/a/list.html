@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" manifest="/cache.manifest">
+<html lang="en" manifest="offline/cache.manifest">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <!--ajax-->
@@ -21,7 +21,7 @@
 
     </style>
 
-    <title>{% block title %}Main</title>{% endblock%}
+    <title>Reserve your room now!</title>
 
     {% load staticfiles %}
     <script src="{% static 'jquery.min.js' %}"></script>
@@ -53,7 +53,7 @@
         <h4 class="modal-title" id="myModalLabel">Available dates</h4>
       </div>
       <div id="modalContent" class="modal-body">
-      this content will be loaded by ajax
+        This content will be loaded on the choice of the user.
       </div>
     </div>
     <div class="modal-footer">
@@ -62,31 +62,20 @@
   </div>
 </div>
 
-<!-- loading icon -->
+
 <div id='loadingmessage' style='display:none'>
   <img src="{% static 'ajax-loader.gif' %}"/>
 </div>
 
-<div class="main_div">
-  <table align="center">
-    <tr>
-      <td>
-          Rooms with their capacities : <br><br>
-          <table border="0">
-            <tr><td><b>Room</b></td>
-                <td><b>Capacity</b></td>
-            </tr>
+<div class="main">
 
-            {% for room in queryset %}
-            <tr><td>
-                <button id="{{room.id}}" class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal">
-                {{ room.name }}
-                </button>
-                </td>
-                <td>{{room.capacity}}</td>
-            </tr>
-            {% endfor %}
-          </table>
+  <table align="center">
+        <tr>
+        <td>
+        Rooms with their capacities : <br><br>
+            <div id="list">
+                This content will be loaded when AJAX has fetched the database
+            </div>
 
           <div class="pagination">
             <span class="step-links">
@@ -106,8 +95,7 @@
       </td>
       <td align="right">
 
-        <form action="{% url 'a:list' %}" id="form_order" method="POST">
-            {% csrf_token %}
+        <form action="" id="searcher" method="POST">
             Search
             <input type="text" name="keyword">
             in description or name. <br>
@@ -124,17 +112,19 @@
             <input type="checkbox" name="scanner"> Scanner<br>
             <input type="checkbox" name="printer"> Printer<br>
 
-            <input type="submit" class="btn btn-large" value="Search">
+            <input type="button" class="btn btn-large" value="Search" onclick="displayResults(this.form)">
             <br><br><br>
         </form>
 
-        <select name="order" form="form_order" onchange="this.form.submit()">
+        <form action="" id="form_order" method="POST">
+        <select name="order" form="form_order" id="select_id" onchange="changeOrder(this.form)">
             <option value="'0'">Choose order of display</option>
             <option value="alph">A-Z</option>
             <option value="alph_inv">Z-A</option>
             <option value="cap">by capacity ascending</option>
             <option value="cap_inv">by capacity descending</option>
         </select><br><br>
+        </form>
       </td>
     </tr>
   </table>
@@ -142,10 +132,6 @@
 
 <br><br>
 
-<hr>
-{% block content %}
-    <a href="{% url 'a:list' %}">Go back to the beginning of the search</a>
-{% endblock %}
 
 {% if user.is_authenticated %}
     <p>You are logged in as: {{ user.username }}<br>
@@ -154,6 +140,391 @@
 
 
 <script>
+
+var rooms = [];
+var terms = [];
+var equip = [];
+var boards = [];
+var currentRooms = [];
+var count = 0;
+
+
+function getModalContent(id) {
+    name = "";
+    for (var i = 0; i < rooms.length; i++){
+        if (rooms[i].id == id) {
+            name += rooms[i].name;
+            break;
+        }
+    }
+    data = "";
+    data += "Beware: you can reserve terms from one day at a time." +
+            "If you open a new date while on a different one" +
+            "If you open a new date while on a different one" +
+            "you will lose your previous choices." +
+            "<h1>" + name + "</h1>" +
+            "<div id='chosenCounter'>" +
+            "You have chosen " + count + " hour(s) so far<br><br>" +
+            "</div>"
+    thisTerms = [];
+    for (var i = 0; i < rooms.length; i++) {
+        if (rooms[i].id == id) {
+            for (var j = 0; j < rooms[i].terms.length; j++) {
+                thisTerms.push(rooms[i].terms[j]);
+            }
+            break;
+        }
+    }
+    if (thisTerms.length > 0) {
+        //TODO: dokoncz wystwietlanie terminow
+        data += "Tutaj wyswietla sie dostepne terminy"
+    }
+    else {
+        data += "There are no terms available.";
+    }
+    return data;
+}
+
+
+function lookFor(name, items) {
+    //TODO: mozna by to bylo zrobic efektywniej..
+    tmp = [];
+    for (var i = 0; i < items.length; i++){
+        added = 0;
+        equipment = items[i].equipment;
+        console.log(equipment);
+        for (var j = 0; j < equipment.length; j++){
+            id = equipment[j];
+            for (var k = 0; k < equip.length; k++) {
+                console.log(equip);
+                if (id == equip[k].id && equip[k].type == name) {
+                    tmp.push(items[i]);
+                    added = 0;
+                    break;
+                }
+            }
+            if (added) break;
+        }
+    }
+    items = tmp.slice();
+    return items;
+}
+
+function lookForBoard(name, items) {
+    //TODO: mozna by to bylo zrobic efektywniej..
+    tmp = [];
+    for (var i = 0; i < items.length; i++){
+        added = 0;
+        thisBoards = items[i].boards;
+        for (var j = 0; j < thisBoards.length; j++){
+            id = thisBoards[j];
+            for (var k = 0; k < boards.length; k++) {
+                if (id == boards[k].id && boards[k].type == name) {
+                    tmp.push(items[i]);
+                    added = 0;
+                    break;
+                }
+            }
+            if (added) break;
+        }
+    }
+    items = tmp.slice();
+    return items;
+}
+
+
+
+function displayResults(form) {
+    var items = rooms.slice();
+    var tmp = [];
+    if (form.keyword.value != "") {
+        tmp = [];
+        for (var i = 0; i < items.length; i++){
+            if (items[i].description.indexOf(form.keyword.value) > -1
+                 || items[i].name.indexOf(form.keyword.value) > -1) {
+                tmp.push(items[i]);
+            }
+        }
+        items = tmp.slice();
+    }
+    if (form.min_capacity.value != "") {
+        tmp = [];
+        for (var i = 0; i < items.length; i++){
+            if (items[i].capacity >= form.min_capacity.value) {
+                tmp.push(items[i]);
+            }
+        }
+        items = tmp.slice();
+    }
+    if (form.max_capacity.value != "") {
+        tmp = [];
+        for (var i = 0; i < items.length; i++){
+            if (items[i].capacity <= form.max_capacity.value) {
+                tmp.push(items[i]);
+            }
+        }
+        items = tmp.slice();
+    }
+    if (form.projector.checked)
+        items = lookFor('projector', items);
+    if (form.whiteboard.checked)
+        items = lookForBoard('whiteboard', items);
+    if (form.blackboard.checked)
+        items = lookForBoard('blackboard', items);
+    if (form.scanner.checked)
+        items = lookFor('scanner', items);
+    if (form.printer.checked)
+        items = lookFor('printer', items);
+
+    loadRoomList(items);
+}
+
+
+function changeOrder(form) {
+    //TODO: jeszcze nie dziala
+    items = currentRooms;
+    var order = document.getElementById("select_id").selectedIndex;
+    if (order == 1) {//'alph'
+        console.log("wszedl do srodka");
+        items.sort(function(a,b) {
+            if (a.name < b.name)
+                return a-b;
+            else
+                return b-a;
+        });
+    }
+    else if (order == 2) //'alph_inv'
+        ;//queryset = queryset.order_by('name').reverse()
+    else if (order == 3) //'cap'
+        ;//queryset = queryset.order_by('capacity')
+    else if (order == 4) //'cap_inv'
+        ;//queryset = queryset.order_by('capacity').reverse()
+
+    loadRoomList(items);
+
+}
+
+
+function Term(id, date, begin, end) {
+    this.id = id;
+	this.date = date;
+	this.begin = begin;
+	this.end = end;
+
+	this.toString = function() {
+		return this.date + ' ' + this.begin + ' - ' + this.end;
+	};
+
+}
+
+function Equipment(id, type, name) {
+    this.id = id;
+	this.type = type;
+	this.name = name;
+	
+	this.toString = function() {
+		return this.type + ": " + this.name;
+	}
+}
+
+function Board(id, type, name) {
+	this.id = id;
+    this.type = type;
+	this.name = name;
+
+	this.toString = function() {
+		return this.type + ": " + this.name;
+	}
+}
+
+function Room(id, name, capacity, description, terms, equipment, boards) {
+	this.id = id;
+    this.name = name;
+	this.capacity = capacity;
+	this.description = description;
+	this.terms = terms;
+	this.equipment = equipment;
+	this.boards = boards;
+
+	this.toString = function() {
+		return this.name;
+	}
+}
+
+function getRooms(url) {
+    var parsedData;
+    var jqxhr = $.ajax(
+        url,
+        {
+            type:"GET",
+            data: {}
+        })
+    .done(function(data) {
+        console.log(url);
+        parsedData = JSON.parse(data);
+        console.log(parsedData);
+        })
+    .fail(function() {
+        console.log( "error" );
+        })
+    .always(function() {
+        console.log( "complete" );
+        for (var i = 0; i < parsedData.length; i++) {
+            var item = parsedData[i];
+            var r = new Room(item.pk, item.fields.name, item.fields.capacity,
+                    item.fields.description, item.fields.terms, item.fields.equipment_items, item.fields.boards);
+            rooms.push(r);
+        }
+        console.log('rooms: ' + rooms);
+    });
+
+}
+
+function getTerms(url) {
+
+    var parsedData;
+    var jqxhr = $.ajax(
+        url,
+        {
+            type:"GET",
+            data: {}
+        })
+    .done(function(data) {
+        console.log(url);
+        parsedData = JSON.parse(data);
+        console.log(parsedData);
+        })
+    .fail(function() {
+        console.log( "error" );
+        })
+    .always(function() {
+        console.log( "complete" );
+        for (var i = 0; i < parsedData.length; i++) {
+            var item = parsedData[i];
+            var t = new Term(item.pk, item.fields.date, item.fields.begin_time, item.fields.end_time);
+            terms.push(t);
+        }
+        console.log('terms: ' + terms);
+    });
+}
+
+
+function getBoards(url) {
+    var parsedData;
+    var jqxhr = $.ajax(
+        url,
+        {
+            type:"GET",
+            data: {}
+        })
+    .done(function(data) {
+        console.log(url);
+        parsedData = JSON.parse(data);
+        console.log(parsedData);
+        })
+    .fail(function() {
+        console.log( "error" );
+        })
+    .always(function() {
+        console.log( "complete" );
+        for (var i = 0; i < parsedData.length; i++) {
+            var item = parsedData[i];
+            var b = new Board(item.pk, item.fields.type, item.fields.name);
+            boards.push(b);
+        }
+        console.log('boards: ' + boards);
+    });
+}
+
+
+function getEquip(url) {
+    var parsedData;
+    var jqxhr = $.ajax(
+        url,
+        {
+            type:"GET",
+            data: {}
+        })
+    .done(function(data) {
+        console.log(url);
+        parsedData = JSON.parse(data);
+        console.log(parsedData);
+        })
+    .fail(function() {
+        console.log( "error" );
+        })
+    .always(function() {
+        console.log( "complete" );
+        for (var i = 0; i < parsedData.length; i++) {
+            var item = parsedData[i];
+            var e = new Equipment(item.pk, item.fields.type, item.fields.name);
+            equip.push(e);
+        }
+        console.log('equipment: ' + equip);
+    });
+}
+
+function loadRoomList(items) {
+    var list;
+    var onPage = 4; // TODO: paginator albo przez tego plug-ina
+    var counter = 0;
+    list = "<table border='0'>" +
+            "<tr><td><b>Room</b></td>" +
+                "<td><b>Capacity</b></td>" +
+            "</tr>";
+    for (var i = 0; i < items.length; i++){
+        list += "<tr><td>" +
+                "<button id=" + items[i].id + ' class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal">' +
+                items[i].name +
+                "</button>" +
+                "</td>" +
+                "<td>" + items[i].capacity + "</td></tr>";
+    }
+    list += "</table>";
+    currentRooms = items.slice();
+    $('#list').html(list);
+}
+
+
+$(document).ready(function () {
+	console.log("ready");
+	$('#loadingmessage').show();
+	console.log("ajax will try to fetch database");
+
+    console.log('token dla list: ' + csrftoken);
+
+    //sciaganie i obrobka danych
+    getTerms("/a/database/terms");
+    getEquip("/a/database/equip");
+    getBoards("/a/database/boards");
+    getRooms("/a/database/rooms");
+
+    //czekam az skonczy ajaxa
+    $(document).ajaxComplete(function() { //uwaga, bo sie zalacza za kazdym razem, kiedy skonczy sie ajax, a wiec
+        //zadziala tylko wtedy, gdy tylko w 1. miejscu bede stosowac ajax (czyli tak jak w zalozeniu)
+        console.log("ajax completed");
+        $('#loadingmessage').hide();
+
+        loadRoomList(rooms);
+
+
+    })
+
+});
+
+$(".btn-room").click(function(e) {
+    console.log("wybrano pokoj");
+
+    e.preventDefault()
+    id = $(this).attr('id')
+
+    url = "/a/" + id + "/"
+
+    data = getModalContent(id);
+
+    $("#modalContent").html(data);
+
+});
 
 function getCookie(name) {
     var cookieValue = null;
@@ -203,36 +574,81 @@ $.ajaxSetup({
     }
 });
 
-$(".btn-room").click(function(e) {
-    e.preventDefault()
-    id = $(this).attr('id')
 
-    url = "/a/" + id + "/"
 
-    $('#loadingmessage').show();
 
-    console.log('token dla list: ' + csrftoken);
 
-    var jqxhr = $.ajax(url, {type:"GET",
-        data: {'room_id': id} } )
-    .done(function(data) {
-        console.log( "success" );
-        $("#modalContent").html(data);
-        $('#loadingmessage').hide();
-        })
-    .fail(function() {
-        console.log( "error" );
-        })
-    .always(function() {
-        console.log( "complete" );
+
+$(".btn-group :checkbox").change(function(e) {
+    e.preventDefault();
+    if (this.checked) {
+        count += 1;
+    }
+    else {
+        count -= 1;
+    }
+    $("#chosenCounter").html("You have chosen " + count + " hour(s) so far <br><br>");
+});
+
+$(".panel-heading").on('click',function() {
+    $('input[type=checkbox]').each(function(i)
+    {
+        if (this.checked) {
+            $(".btn-group label").eq(i).button('toggle');
+        }
     });
 });
 
+$(".btn-reserve").click(function(e) {
+        e.preventDefault();
+        var hours = [];
+        var date;
+        var room_id;
+
+        $(".btn-group :checked").each(function() {
+            hours.push(this.id.substring(10));
+        });
+        //console.log({'h':hours.toString()});
+        //room_id = $("#main_form").name
+        console.log('room: ' + room_id)
+        date = this.id.substring(7,17)
+        room_id = this.id.substring(17)
+        console.log('id: ' + this.id)
+        console.log('hours: ' + hours)
+        console.log('date: ' + date)
+
+        console.log('dla detail: ' + csrftoken);
+        var jqxhr = $.ajax(
+                room_id + "/make_reservation",
+                //"make_reservation",
+                {
+                type: "POST",
+                //data: {'hours': '['+hours.toString()+']', 'room_id': room_id, 'date': my_date }
+                data: {'hours': hours, 'room_id': room_id, 'date': date,
+                'csrfmiddlewaretoken': csrftoken}
+
+        })
+        .done(function(data) {
+            console.log( "success" );
+            $("#modalContent").html(data);
+            count = 0;
+            })
+        .fail(function() {
+            console.log( "error" );
+            alert("We are sorry but i is impossible to make the reservation you wanted.")
+            })
+        .always(function() {
+            console.log( "complete" );
+            });
+
+})
 
 
-    </script>
 
-<!-- koniec skryptu z Ciebiery-->
+//TODO: pozbyc sie wszytskich statycznych elementow
+
+</script>
+
 
 
 

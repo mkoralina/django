@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
@@ -6,6 +7,7 @@ from django.db.models import Q
 from django.db import transaction
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from datetime import datetime
+from django.core import serializers
 import json
 
 
@@ -113,6 +115,23 @@ def log_in(request):
 def log_out(request):
     logout(request)
     return redirect('a:list')
+
+
+
+def database(request, what):
+    items = []
+    if what == 'rooms':
+        items = Room.objects.all()
+    elif what == 'terms':
+        items = Term.objects.all()
+    elif what == 'equip':
+        items = Equipment.objects.all()
+    elif what == 'boards':
+        items = Board.objects.all()
+
+    data = serializers.serialize('json',items)
+
+    return HttpResponse(data)
 
 
 @login_required

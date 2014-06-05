@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r'^reserve$', views.list, name='list'),
     url(r'^login$', views.log_in, name='login'),
     url(r'^logout$', views.log_out, name='logout'),
+    url(r'^database/(?P<what>\w+)/$', views.database, name='database'),
 )

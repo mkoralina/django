@@ -1,0 +1,7 @@
+zmieniałam:
+
+w Firefoxie:
+
+network.http.use-cache = false (bylo true)
+browser.cache.offline.enable = false (bylo true)
+za http://stackoverflow.com/questions/289751/turn-off-caching-on-firefox
