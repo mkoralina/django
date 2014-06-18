@@ -165,17 +165,75 @@ function getModalContent(id) {
             "You have chosen " + count + " hour(s) so far<br><br>" +
             "</div>"
     thisTerms = [];
+    //iteruje po pokojach
     for (var i = 0; i < rooms.length; i++) {
         if (rooms[i].id == id) {
+            //iteruje po terminach zwiazanych z pokojami
             for (var j = 0; j < rooms[i].terms.length; j++) {
-                thisTerms.push(rooms[i].terms[j]);
+                //szukam id terminu w tabeli terminow
+                for (var k = 0; k < terms.length; k++) {
+                    if (terms[k].id == rooms[i].terms[j]) {
+                        thisTerms.push(terms[k]);
+                        break;
+                    }
+                }
             }
-            break;
         }
     }
     if (thisTerms.length > 0) {
-        //TODO: dokoncz wystwietlanie terminow
-        data += "Tutaj wyswietla sie dostepne terminy"
+        dates = [];
+        for (var i = 0 ; i < thisTerms.length; i++) {
+             if (dates.indexOf(thisTerms[i].date) == -1) {
+                dates.push(thisTerms[i].date);
+            }
+        }
+
+        console.log(dates);
+
+        data += '<div class="panel-group" id="accordion">';
+        for (var i = 0 ; i < dates.length; i++) {
+            hours = [];
+            data += '<div class="panel panel-default">' +
+                        '<div class="panel-heading">' +
+                        '<h4 class="panel-title">' +
+                        '<a data-toggle="collapse" data-parent="#accordion" href="#collapse' + i + '" onclick="clearCheckboxes()">' +
+                        'Date: ' + dates[i];
+
+            for (var j = 0; j < thisTerms.length; j++) {
+                if (thisTerms[j].date == dates[i]) {
+                    begin = parseInt(thisTerms[j].begin.substring(0,2));
+                    end = thisTerms[j].end.substring(0,2);
+                    data += " (" + begin + "-" + end + ")";
+                    for (var k = begin; k <= end; k++) {
+                        hours.push(k);
+                    }
+                }
+            }
+
+            data +=     '</a>' +
+                        '</h4>' +
+                        '</div>' +
+                        '<div id="collapse' + i + '" class="panel-collapse collapse">' +
+                            '<div class="panel-body">' +
+                                '<div class="btn-group" data-toggle="buttons">' +
+                                'Choose from available hours and click on Reserve: <br><br>';
+
+            for (var j = 0; j < hours.length; j++) {
+                data += '<label class="btn btn-primary btn-hour">' +
+                        '<input type="checkbox" name="checkboxes[]" id="' + dates[i] + hours[j] + '" onchange="hourChosen(this)" value="' + dates[i] + '">' +
+                        hours[j] + "-" + (hours[j]+1) +
+                        '</label>';
+            }
+            data += '<br><br>' +
+                    '</div>' +
+                    '<br><br>' +
+                    '<input id="reserve' + dates[i] + id + '" class="btn btn-default btn-large btn-reserve" value="Reserve">' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+        }
+        data += '</div>';
     }
     else {
         data += "There are no terms available.";
@@ -522,22 +580,6 @@ $(document).ready(function () {
 
 });
 
-
-
-$(".btn-room").click(function(e) {
-    console.log("wybrano pokoj");
-
-    e.preventDefault()
-    id = $(this).attr('id')
-
-    url = "/a/" + id + "/"
-
-    data = getModalContent(id);
-
-    $("#modalContent").html(data);
-
-});
-
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -591,25 +633,24 @@ $.ajaxSetup({
 
 
 
-$(".btn-group :checkbox").change(function(e) {
-    e.preventDefault();
-    if (this.checked) {
+function hourChosen(button){
+    if (button.checked) {
         count += 1;
     }
     else {
         count -= 1;
     }
     $("#chosenCounter").html("You have chosen " + count + " hour(s) so far <br><br>");
-});
+}
 
-$(".panel-heading").on('click',function() {
+function clearCheckboxes() {
     $('input[type=checkbox]').each(function(i)
     {
         if (this.checked) {
             $(".btn-group label").eq(i).button('toggle');
         }
     });
-});
+}
 
 $(".btn-reserve").click(function(e) {
         e.preventDefault();
