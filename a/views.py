@@ -134,6 +134,28 @@ def database(request, what):
     return HttpResponse(data)
 
 
+def manifest(request):
+    return render(request, 'a/offline/cache.manifest', content_type='text/manifest')
+
+def csrf(request):
+    return render(request, 'a/offline/csrf.js', content_type='text/javascript')
+
+def jquery(request):
+    return render(request, 'a/offline/jquery.js', content_type='text/javascript')
+
+def jquerymin(request):
+    return render(request, 'a/offline/jquery.min.js', content_type='text/javascript')
+
+def bootstrapcss(request):
+    return render(request, 'a/offline/bootstrap/css/bootstrap.min.css', content_type='text/css')
+
+def bootstrapjs(request):
+    return render(request, 'a/offline/bootstrap/js/bootstrap.min.js', content_type='text/javascript')
+
+def loader(request):
+    return render(request, 'a/offline/loader.gif', content_type='image/gif')
+
+
 @login_required
 def list(request):
     queryset = Room.objects.all()

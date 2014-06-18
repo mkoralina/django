@@ -8,4 +8,12 @@ urlpatterns = patterns('',
     url(r'^login$', views.log_in, name='login'),
     url(r'^logout$', views.log_out, name='logout'),
     url(r'^database/(?P<what>\w+)/$', views.database, name='database'),
+    url(r'^cache.manifest$', views.manifest, name='manifest'),
+    url(r'^jquery.js$', views.jquery, name='jquery'),
+    url(r'^bootstrap/css/bootstrap.min.css$', views.bootstrapcss, name='bootstrapcss'),
+    url(r'^bootstrap/js/bootstrap.min.js$', views.bootstrapjs, name='bootstrapjs'),
+    url(r'^jquery.min.js$', views.jquerymin, name='jquerymin'),
+    url(r'^ajax-loader$', views.loader, name='loader'),
+
+
 )

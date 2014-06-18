@@ -1,11 +1,10 @@
 CACHE MANIFEST
 
-# rev 4
-index.js
+# rev 6
 jquery.js
 jquery.min.js
 bootstrap/css/bootstrap.min.css
 bootstrap/js/bootstrap.min.js
-ajax-loader.gif
+#ajax-loader.gif
 
 

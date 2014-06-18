@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" manifest="offline/cache.manifest">
+<html>
+<!-- <html lang="en" manifest="cache.manifest"> -->
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <!--ajax-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 
-    {% load staticfiles %}
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
     /*calosc stylow*/
 
@@ -23,10 +23,8 @@
 
     <title>Reserve your room now!</title>
 
-    {% load staticfiles %}
-    <script src="{% static 'jquery.min.js' %}"></script>
-    {% load staticfiles %}
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
 
 
 </head>
@@ -64,7 +62,7 @@
 
 
 <div id='loadingmessage' style='display:none'>
-  <img src="{% static 'ajax-loader.gif' %}"/>
+  <img src="ajax-loader"/>
 </div>
 
 <div class="main">
@@ -304,6 +302,18 @@ function changeOrder(form) {
 
 }
 
+function setModalContent(id) {
+    console.log("wybrano pokoj o id " + id);
+
+    url = "/a/" + id + "/"
+
+    data = getModalContent(id);
+
+    $("#modalContent").html(data);
+
+}
+
+
 
 function Term(id, date, begin, end) {
     this.id = id;
@@ -474,7 +484,7 @@ function loadRoomList(items) {
             "</tr>";
     for (var i = 0; i < items.length; i++){
         list += "<tr><td>" +
-                "<button id=" + items[i].id + ' class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal">' +
+                "<button id=" + items[i].id + ' class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal" onclick="setModalContent(this.id)">' +
                 items[i].name +
                 "</button>" +
                 "</td>" +
@@ -511,6 +521,8 @@ $(document).ready(function () {
     })
 
 });
+
+
 
 $(".btn-room").click(function(e) {
     console.log("wybrano pokoj");
