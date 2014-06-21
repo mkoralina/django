@@ -162,6 +162,15 @@ def bootstrapjs(request):
 def loader(request):
     return render(request, 'a/offline/loader.gif', content_type='image/gif')
 
+def qunitjs(request):
+    return render(request, 'a/offline/qunit-1.14.0.js', content_type='text/javascript')
+
+def qunitcss(request):
+    return render(request, 'a/offline/qunit-1.14.0.css', content_type='text/css')
+
+def tests(request):
+    return render(request, 'a/offline/tests.js', content_type='text/javascript')
+
 
 @login_required
 def list(request):

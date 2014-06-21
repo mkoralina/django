@@ -1,10 +1,13 @@
 CACHE MANIFEST
 
-# rev 7
+# rev 8
 jquery.js
 jquery.min.js
 bootstrap/css/bootstrap.min.css
 bootstrap/js/bootstrap.min.js
+tests.js
+qunit-1.14.0.js
+qunit-1.14.0.css
 #ajax-loader.gif
 
 

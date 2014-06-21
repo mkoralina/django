@@ -14,6 +14,10 @@ urlpatterns = patterns('',
     url(r'^bootstrap/js/bootstrap.min.js$', views.bootstrapjs, name='bootstrapjs'),
     url(r'^jquery.min.js$', views.jquerymin, name='jquerymin'),
     url(r'^ajax-loader$', views.loader, name='loader'),
+    url(r'^tests.js$', views.tests, name='tests'),
+    url(r'^qunit-1.14.0.js$', views.qunitjs, name='qunitjs'),
+    url(r'^qunit-1.14.0.css$', views.qunitcss, name='qunitcss'),
+
 
 
 )

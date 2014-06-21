@@ -9,8 +9,6 @@
 
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
-    /*calosc stylow*/
-
     .btn-room {
         width: 7em;
     }
@@ -26,10 +24,14 @@
     <script src="jquery.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
 
+    <script src="qunit-1.14.0.js"></script>
+    <link href="qunit-1.14.0.css" rel="stylesheet" media="screen">
+    <script src="tests.js"></script>
 
 </head>
 
 <body>
+
 
 
 {% if messages %}
@@ -757,7 +759,7 @@ function reserve(button) {
 </script>
 
 
-
+<div id="qunit"></div>
 
 
 </body>
