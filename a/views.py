@@ -9,7 +9,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from datetime import datetime
 from django.core import serializers
 import json
-
+import json as simplejson
 
 from a.models import Reservation, Room, Term, Equipment, Board
 
@@ -89,7 +89,14 @@ def make_reservation(request, room_id):
         except:
             raise StandardError("Impossible to reserve")
 
-    return render(request, 'a/detail.html', {'room': room})
+    #update bazy danych na stronie
+    rooms = Room.objects.all()
+    rooms = serializers.serialize('json',rooms)
+    terms = Term.objects.all()
+    terms = serializers.serialize('json',terms)
+    r = simplejson.dumps({"rooms": rooms, "terms": terms})
+    return HttpResponse(r)
+
 
 
 
