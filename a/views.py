@@ -168,6 +168,12 @@ def qunitjs(request):
 def qunitcss(request):
     return render(request, 'a/offline/qunit-1.14.0.css', content_type='text/css')
 
+def simplejs(request):
+    return render(request, 'a/offline/simplePagination/simplePagination.js', content_type='text/javascript')
+
+def simplecss(request):
+    return render(request, 'a/offline/simplePagination/simplePagination.css', content_type='text/css')
+
 def tests(request):
     return render(request, 'a/offline/tests.js', content_type='text/javascript')
 

@@ -10,7 +10,7 @@
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
     .btn-room {
-        width: 7em;
+        width: 9em;
     }
 
     td {
@@ -20,6 +20,9 @@
     </style>
 
     <title>Reserve your room now!</title>
+
+    <script type="text/javascript" src="simplePagination/simplePagination.js"></script>
+    <link type="text/css" rel="stylesheet" href="simplePagination/simplePagination.css"/>
 
     <script src="jquery.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -64,7 +67,7 @@
 
 
 <div id='loadingmessage' style='display:none'>
-  <img src="ajax-loader"/>
+<!--  <img src="ajax-loader"/>-->
 </div>
 
 <div class="main">
@@ -73,25 +76,15 @@
         <tr>
         <td>
         Rooms with their capacities : <br><br>
+
+            <input type='hidden' id='current_page'/>
+            <input type='hidden' id='show_per_page'/>
+
             <div id="list">
                 This content will be loaded when AJAX has fetched the database
             </div>
+            <div id='page_navigation'></div>
 
-          <div class="pagination">
-            <span class="step-links">
-                {% if queryset.has_previous %}
-                    <a href="?page={{ queryset.previous_page_number }}">previous</a>
-                {% endif %}
-
-                <span class="current">
-                    Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
-                </span>
-
-                {% if queryset.has_next %}
-                    <a href="?page={{ queryset.next_page_number }}">next</a>
-                {% endif %}
-            </span>
-          </div>
       </td>
       <td align="right">
 
@@ -245,19 +238,18 @@ function getModalContent(id) {
 
 
 function lookFor(name, items) {
-    //TODO: mozna by to bylo zrobic efektywniej..
     tmp = [];
     for (var i = 0; i < items.length; i++){
         added = 0;
         equipment = items[i].equipment;
-        console.log(equipment);
+        //console.log(equipment);
         for (var j = 0; j < equipment.length; j++){
             id = equipment[j];
             for (var k = 0; k < equip.length; k++) {
-                console.log(equip);
+                //console.log(equip);
                 if (id == equip[k].id && equip[k].type == name) {
                     tmp.push(items[i]);
-                    added = 0;
+                    added = 1;
                     break;
                 }
             }
@@ -269,11 +261,13 @@ function lookFor(name, items) {
 }
 
 function lookForBoard(name, items) {
-    //TODO: mozna by to bylo zrobic efektywniej..
+    console.log('name: ' + name);
+    console.log('boards: ' + boards);
     tmp = [];
     for (var i = 0; i < items.length; i++){
         added = 0;
         thisBoards = items[i].boards;
+        console.log('thisBoards: ' + thisBoards);
         for (var j = 0; j < thisBoards.length; j++){
             id = thisBoards[j];
             for (var k = 0; k < boards.length; k++) {
@@ -287,6 +281,7 @@ function lookForBoard(name, items) {
         }
     }
     items = tmp.slice();
+    console.log('items: ' + items);
     return items;
 }
 
@@ -340,24 +335,40 @@ function displayResults(form) {
 
 function changeOrder(form) {
     //TODO: jeszcze nie dziala
-    items = currentRooms;
+    items = currentRooms.slice();
     var order = document.getElementById("select_id").selectedIndex;
     if (order == 1) {//'alph'
-        console.log("wszedl do srodka");
         items.sort(function(a,b) {
-            if (a.name < b.name)
-                return a-b;
-            else
-                return b-a;
-        });
+            var nameA = a.name.toLowerCase(), nameB = b.name.toLowerCase()
+            if (nameA < nameB) //sort string ascending
+                return -1
+            if (nameA > nameB)
+                return 1
+            return 0
+        })
     }
-    else if (order == 2) //'alph_inv'
-        ;//queryset = queryset.order_by('name').reverse()
-    else if (order == 3) //'cap'
-        ;//queryset = queryset.order_by('capacity')
-    else if (order == 4) //'cap_inv'
-        ;//queryset = queryset.order_by('capacity').reverse()
-
+    else if (order == 2) { //'alph_inv'
+        items.sort(function(a,b) {
+            var nameA = a.name.toLowerCase(), nameB = b.name.toLowerCase()
+            if (nameA < nameB) 
+                return 1
+            if (nameA > nameB)
+                return -1
+            return 0
+        })
+    }
+    else if (order == 3) { //'cap' ascending
+        items.sort(function(a, b) {
+            return a.capacity - b.capacity;
+        })
+    }
+    else if (order == 4) {//'cap_inv'
+        items.sort(function(a, b) {
+            return b.capacity - a.capacity;
+        })
+    }
+    //console.log('current Rooms po sortowaniu: ' + items);
+    currentRooms = items.slice();
     loadRoomList(items);
 
 }
@@ -404,14 +415,14 @@ function Board(id, type, name) {
 	}
 }
 
-function Room(id, name, capacity, description, terms, equipment, boards) {
+function Room(id, name, capacity, description, myTerms, equipment, myBoards) {
 	this.id = id;
     this.name = name;
 	this.capacity = capacity;
 	this.description = description;
-	this.terms = terms;
+	this.terms = myTerms;
 	this.equipment = equipment;
-	this.boards = boards;
+	this.boards = myBoards;
 
 	this.toString = function() {
 		return this.name;
@@ -449,7 +460,10 @@ function getRooms(url) {
             rooms = [];
         }
         else rooms = JSON.parse(localStorage.getItem('rooms'));
-        })
+    })
+    .always(function() {
+            console.log( "complete" );
+    });
 }
 
 function getTerms(url) {
@@ -487,6 +501,9 @@ function getTerms(url) {
         localStorage.removeItem('terms');
         localStorage.setItem('terms', JSON.stringify(terms));
         console.log('terms: ' + terms);
+    })
+    .always(function() {
+    console.log( "complete" );
     });
 }
 
@@ -511,7 +528,7 @@ function getBoards(url) {
             boards = [];
         }
         else {
-            boards = JSON.parse(localStorage.getItem('boards'));
+            boards = JSON.parse(localStorage.getItem("boards"));
             console.log('boards: ' + boards);
         }
         })
@@ -525,6 +542,9 @@ function getBoards(url) {
         localStorage.removeItem('boards');
         localStorage.setItem('boards', JSON.stringify(boards));
         console.log('boards: ' + boards);
+    })
+    .always(function() {
+            console.log( "complete" );
     });
 }
 
@@ -563,42 +583,118 @@ function getEquip(url) {
         localStorage.removeItem('equipment');
         localStorage.setItem('equipment', JSON.stringify(equip));
         console.log('equipment: ' + equip);
+    })
+    .always(function() {
+            console.log( "complete" );
     });
 }
 
 function loadRoomList(items) {
-    var list;
-    var onPage = 4; // TODO: paginator albo przez tego plug-ina
-    var counter = 0;
-    list = "<table border='0'>" +
-            "<tr><td><b>Room</b></td>" +
-                "<td><b>Capacity</b></td>" +
-            "</tr>";
-    for (var i = 0; i < items.length; i++){
-        list += "<tr><td>" +
-                "<button id=" + items[i].id + ' class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal" onclick="setModalContent(this.id)">' +
-                items[i].name +
-                "</button>" +
-                "</td>" +
-                "<td>" + items[i].capacity + "</td></tr>";
+    var list = "";
+    var onPage = 4;
+    var counter = 0;//chyba unused
+    if (items.length) {
+        for (var i = 0; i < items.length; i++){
+            list += "<div>" +
+                    '<button id="button' + items[i].id + '" class="btn btn-primary btn-lg btn-room" data-toggle="modal" data-target="#myModal" onclick="setModalContent(this.id.substr(6))">' +
+                    items[i].name + " (" + items[i].capacity + ")" +
+                    "</button>" +
+                    "<br>" +
+                    "</div>";
+        }
     }
-    list += "</table>";
+    else { list += "<div></div>"; }
     currentRooms = items.slice();
     $('#list').html(list);
+    paginate();
 }
+
+function paginate() {
+
+    //console.log('children: ' + $('#list').children().size());
+    perPage = 10;
+    numItems = $('#list').children().size();
+    numPages = Math.ceil(numItems/perPage);
+
+    $('#current_page').val(0);
+    $('#show_per_page').val(perPage);
+
+    var navigation_html = '<a class="previous_link" href="javascript:previous();">Prev </a>';
+    var current_link = 0;
+    while(numPages > current_link){
+        navigation_html += '<a class="page_link" href="javascript:go_to_page(' + current_link +')" longdesc="' + current_link +'">'+ (current_link + 1) +' </a>';
+        current_link++;
+    }
+    navigation_html += '<a class="next_link" href="javascript:next();"> Next</a>';
+
+    $('#page_navigation').html(navigation_html);
+
+    //add active_page class to the first page link
+    $('#page_navigation .page_link:first').addClass('active_page');
+
+    //hide all the elements inside content div
+    $('#list').children().css('display', 'none');
+
+    //and show the first n (show_per_page) elements
+    $('#list').children().slice(0, perPage).css('display', 'block');
+
+}
+
+function previous(){
+
+    new_page = parseInt($('#current_page').val()) - 1;
+    //if there is an item before the current active link run the function
+    if($('.active_page').prev('.page_link').length==true){
+        go_to_page(new_page);
+    }
+
+}
+
+function next(){
+    newPage = parseInt($('#current_page').val()) + 1;
+    //if there is an item after the current active link run the function
+    if($('.active_page').next('.page_link').length==true){
+        go_to_page(newPage);
+    }
+
+}
+function go_to_page(page_num){
+    //get the number of items shown per page
+    var show_per_page = parseInt($('#show_per_page').val());
+
+    //get the element number where to start the slice from
+    start_from = page_num * show_per_page;
+
+    //get the element number where to end the slice
+    end_on = start_from + show_per_page;
+
+    //hide all children elements of content div, get specific items and show them
+    $('#list').children().css('display', 'none').slice(start_from, end_on).css('display', 'block');
+
+    /*get the page link that has longdesc attribute of the current page and add active_page class to it
+    and remove that class from previously active page link*/
+    $('.page_link[longdesc=' + page_num +']').addClass('active_page').siblings('.active_page').removeClass('active_page');
+
+    //update the current page input field
+    $('#current_page').val(page_num);
+}
+
+
+
 
 function fetchDatabase() {
     //sciaganie i obrobka danych
     getTerms("/a/database/terms");
-    getEquip("/a/database/equip");
     getBoards("/a/database/boards");
+    getEquip("/a/database/equip");
+
     getRooms("/a/database/rooms");
 }
 
 
 $(document).ready(function () {
 	console.log("ready");
-	$('#loadingmessage').show();
+	//$('#loadingmessage').show();
 	console.log("ajax will try to fetch database");
     fetchDatabase();
 
@@ -606,8 +702,8 @@ $(document).ready(function () {
     $(document).ajaxComplete(function() { //uwaga, bo sie zalacza za kazdym razem, kiedy skonczy sie ajax, a wiec
         //zadziala tylko wtedy, gdy tylko w 1. miejscu bede stosowac ajax (czyli tak jak w zalozeniu)
         console.log("ajax completed");
-        //TODO: uporac sie z gifem
-        $('#loadingmessage').hide();
+
+        //$('#loadingmessage').hide();
         loadRoomList(rooms);
     })
 });

@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# rev 8
+# rev 11
 jquery.js
 jquery.min.js
 bootstrap/css/bootstrap.min.css
@@ -8,6 +8,8 @@ bootstrap/js/bootstrap.min.js
 tests.js
 qunit-1.14.0.js
 qunit-1.14.0.css
+simplePagination/simplePagination.js
+simplePagination/simplePagination.css
 #ajax-loader.gif
 
 

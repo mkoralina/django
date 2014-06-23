@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^tests.js$', views.tests, name='tests'),
     url(r'^qunit-1.14.0.js$', views.qunitjs, name='qunitjs'),
     url(r'^qunit-1.14.0.css$', views.qunitcss, name='qunitcss'),
-
-
+    url(r'^simplePagination/simplePagination.js$', views.simplejs, name='simplejs'),
+    url(r'^simplePagination/simplePagination.css$', views.simplecss, name='simplecss'),
 
 )
